@@ -343,6 +343,34 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      {/* Mobile Sticky Footer Navigation */}
+      {activeSector && (
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-[#2a2a2a] h-16 flex items-center justify-around print:hidden">
+          <Link
+            href="/equipe"
+            className={`w-1/2 flex items-center justify-center gap-2 h-full font-bold text-xs uppercase tracking-wider transition-all border-r border-[#2a2a2a] ${
+              pathname === "/equipe"
+                ? "bg-[#ff5500]/10 text-[#ff5500]"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">groups</span>
+            Minha Equipe
+          </Link>
+          <Link
+            href="/recrutamento"
+            className={`w-1/2 flex items-center justify-center gap-2 h-full font-bold text-xs uppercase tracking-wider transition-all ${
+              pathname === "/recrutamento"
+                ? "bg-[#ff5500]/10 text-[#ff5500]"
+                : "text-gray-400 hover:text-white"
+            }`}
+          >
+            <span className="material-symbols-outlined text-lg">checklist</span>
+            Fila de Recrutamento
+          </Link>
+        </div>
+      )}
     </>
   );
 }

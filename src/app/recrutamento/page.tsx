@@ -189,7 +189,7 @@ export default function RecrutamentoPage() {
   const occupancyPercent = sectorMeta > 0 ? Math.min(Math.round((allocatedCount / sectorMeta) * 100), 100) : 0;
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white font-sans pb-16">
+    <div className="min-h-screen bg-[#121212] text-white font-sans pb-28 sm:pb-16">
       <Header />
 
       <main className="pt-8 px-4 md:px-8 max-w-4xl mx-auto space-y-6">

@@ -143,7 +143,7 @@ export default function EquipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-[#121212] text-white font-sans pb-16 print:bg-white print:text-black">
+    <div className="min-h-screen bg-[#121212] text-white font-sans pb-28 sm:pb-16 print:bg-white print:text-black">
       
       {/* Hide Header on print */}
       <div className="print:hidden">
