@@ -30,9 +30,10 @@ export default function AdminPage() {
   const [stats, setStats] = useState({ total: 0, allocated: 0, available: 0 });
   const [phase, setPhase] = useState("1");
   const [importing, setImporting] = useState(false);
+  const [importMode, setImportMode] = useState<'insert' | 'update'>('insert');
   const [csvFile, setCsvFile] = useState<File | null>(null);
   const [csvData, setCsvData] = useState<any[]>([]);
-  const [importResult, setImportResult] = useState<{ success: boolean; imported: number; skipped: number } | null>(null);
+  const [importResult, setImportResult] = useState<{ success: boolean; imported: number; updated: number; skipped: number } | null>(null);
   const [isDark, setIsDark] = useState(true);
   const [volunteers, setVolunteers] = useState<any[]>([]);
   const [searchServant, setSearchServant] = useState("");
@@ -177,11 +178,12 @@ export default function AdminPage() {
     setImporting(true);
     setImportResult(null);
 
-    const res = await importVolunteers(csvData);
+    const res = await importVolunteers(csvData, importMode);
     if (res.success) {
       setImportResult({
         success: true,
         imported: res.importedCount ?? 0,
+        updated: res.updatedCount ?? 0,
         skipped: res.skippedCount ?? 0
       });
       setCsvFile(null);
@@ -191,6 +193,7 @@ export default function AdminPage() {
       setImportResult({
         success: false,
         imported: 0,
+        updated: 0,
         skipped: 0
       });
     }
@@ -553,8 +556,51 @@ export default function AdminPage() {
                   Carregue listas de servos via CSV. O importador limpa duplicatas baseando-se no telefone.
                 </p>
 
+                {/* Import Mode Selector */}
+                <div className="mt-4 flex flex-col gap-2">
+                  <span className="text-[10px] text-gray-400 font-bold uppercase tracking-wider">Modo de Importação</span>
+                  <div className="grid grid-cols-2 gap-2 bg-[#121212] p-1 rounded-xl border border-[#2a2a2a]">
+                    <button
+                      type="button"
+                      onClick={() => setImportMode('insert')}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        importMode === 'insert'
+                          ? "bg-[#ff5500] text-white shadow-md shadow-[#ff5500]/10"
+                          : "text-gray-400 hover:text-white hover:bg-[#202020]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm">add_circle</span>
+                      Inserir Novos
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setImportMode('update')}
+                      className={`py-2 px-3 rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
+                        importMode === 'update'
+                          ? "bg-[#ff5500] text-white shadow-md shadow-[#ff5500]/10"
+                          : "text-gray-400 hover:text-white hover:bg-[#202020]"
+                      }`}
+                    >
+                      <span className="material-symbols-outlined text-sm">sync_alt</span>
+                      Atualizar Existentes
+                    </button>
+                  </div>
+                  {/* Mode Info Notes */}
+                  <p className="text-[10px] text-gray-400 leading-relaxed min-h-[30px] transition-all">
+                    {importMode === 'insert' ? (
+                      <span className="text-amber-500/90 font-medium">
+                        ⚠️ **Inserir:** Apenas cadastrará servos novos. Se o telefone já existir no banco de dados, o registro será ignorado e não alterará os dados salvos.
+                      </span>
+                    ) : (
+                      <span className="text-green-400/90 font-medium">
+                        🔄 **Atualizar:** Se o telefone já existir, todos os campos do servo serão sobrescritos com as informações do CSV. Servos novos também serão criados.
+                      </span>
+                    )}
+                  </p>
+                </div>
+
                 {/* Dropzone */}
-                <div className="mt-5 border-2 border-dashed border-[#2a2a2a] hover:border-[#ff5500]/50 rounded-xl p-6 text-center cursor-pointer transition-colors relative">
+                <div className="mt-4 border-2 border-dashed border-[#2a2a2a] hover:border-[#ff5500]/50 rounded-xl p-6 text-center cursor-pointer transition-colors relative">
                   <input
                     type="file"
                     accept=".csv"
@@ -579,7 +625,7 @@ export default function AdminPage() {
                   <div className={`mt-4 p-3.5 border rounded-xl flex items-center gap-3 ${
                     importResult.success 
                       ? "bg-green-500/10 border-green-500/30 text-green-400" 
-                      : "bg-red-500/10 border-red-500/30 text-red-400"
+                      : "bg-[#801010]/20 border-red-500/30 text-red-400"
                   }`}>
                     <span className="material-symbols-outlined text-lg">
                       {importResult.success ? "check_circle" : "error"}
@@ -589,7 +635,7 @@ export default function AdminPage() {
                         {importResult.success ? "Importação concluída" : "Falha na importação"}
                       </p>
                       <p className="text-[10px] opacity-80 mt-0.5 leading-tight">
-                        {importResult.imported} adicionados, {importResult.skipped} duplicados ou pulados.
+                        {importResult.imported} adicionados, {importResult.updated} atualizados, {importResult.skipped} duplicados ou pulados.
                       </p>
                     </div>
                   </div>

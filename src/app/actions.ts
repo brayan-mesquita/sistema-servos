@@ -428,12 +428,14 @@ export async function importVolunteers(
     telefonePastor?: string;
     numeroLegendario?: string;
     anotacoes?: string;
-  }>
+  }>,
+  mode: 'insert' | 'update' = 'insert'
 ) {
   try {
     let importedCount = 0;
     let skippedCount = 0;
-    const results: Array<{ nome: string; phone: string; status: 'imported' | 'skipped'; reason?: string }> = [];
+    let updatedCount = 0;
+    const results: Array<{ nome: string; phone: string; status: 'imported' | 'updated' | 'skipped'; reason?: string }> = [];
     const processedPhonesInBatch = new Set<string>();
 
     for (const row of rows) {
@@ -469,13 +471,43 @@ export async function importVolunteers(
       });
 
       if (existing) {
-        skippedCount++;
-        results.push({
-          nome: rawNome.trim(),
-          phone: normalizedTelefone,
-          status: 'skipped',
-          reason: 'Telefone já cadastrado'
-        });
+        if (mode === 'update') {
+          // Update existing volunteer
+          await prisma.voluntario.update({
+            where: { id: existing.id },
+            data: {
+              nome: rawNome.trim(),
+              email: rawEmail ? rawEmail.trim() : null,
+              // Mantém o status original se já foi alocado/recrutado, ou reseta se necessário?
+              // Geralmente, atualizamos apenas dados pessoais. Mantemos o status existente.
+              opcao1: row.opcao1 || null,
+              opcao2: row.opcao2 || null,
+              idade: row.idade ? Number(row.idade) : null,
+              dataNascimento: row.dataNascimento || null,
+              igreja: row.igreja || null,
+              quantidadeServicos: row.quantidadeServicos ? Number(row.quantidadeServicos) : 0,
+              areasServidas: row.areasServidas || null,
+              nomePastor: row.nomePastor || null,
+              telefonePastor: row.telefonePastor || null,
+              numeroLegendario: row.numeroLegendario || null,
+              anotacoes: row.anotacoes || null
+            }
+          });
+          updatedCount++;
+          results.push({
+            nome: rawNome.trim(),
+            phone: normalizedTelefone,
+            status: 'updated'
+          });
+        } else {
+          skippedCount++;
+          results.push({
+            nome: rawNome.trim(),
+            phone: normalizedTelefone,
+            status: 'skipped',
+            reason: 'Telefone já cadastrado'
+          });
+        }
         continue;
       }
 
@@ -511,6 +543,7 @@ export async function importVolunteers(
     return {
       success: true,
       importedCount,
+      updatedCount,
       skippedCount,
       results
     };
