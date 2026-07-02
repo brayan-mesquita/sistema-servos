@@ -30,6 +30,19 @@ export async function normalizePhoneNumber(phone: string): Promise<string> {
   return digits;
 }
 
+function normalizeSectorName(option: string | null | undefined): string | null {
+  if (!option) return null;
+  const opt = option.toLowerCase().trim();
+  if (opt.includes('adm') || opt.includes('administração') || opt.includes('administracao')) return 'Administração';
+  if (opt.includes('segurança') || opt.includes('seguranca') || opt.includes('prevenção') || opt.includes('prevencao')) return 'Segurança';
+  if (opt.includes('eventos') || opt.includes('percorrer')) return 'Eventos';
+  if (opt.includes('mídia') || opt.includes('midia')) return 'Mídia';
+  if (opt.includes('logística') || opt.includes('logistica')) return 'Logística';
+  if (opt.includes('intercessão') || opt.includes('intercessao') || opt.includes('dip') || opt.includes('prédica') || opt.includes('predica')) return 'DIP';
+  if (opt.includes('qap') || opt.includes('suporte')) return 'QAP';
+  return option;
+}
+
 /**
  * Coordinator login with auto-seeding for default coordinators to ensure seamless testing
  */
@@ -537,8 +550,8 @@ export async function importVolunteers(
               email: rawEmail ? rawEmail.trim() : null,
               // Mantém o status original se já foi alocado/recrutado, ou reseta se necessário?
               // Geralmente, atualizamos apenas dados pessoais. Mantemos o status existente.
-              opcao1: row.opcao1 || null,
-              opcao2: row.opcao2 || null,
+              opcao1: normalizeSectorName(row.opcao1) || null,
+              opcao2: normalizeSectorName(row.opcao2) || null,
               idade: row.idade ? Number(row.idade) : null,
               dataNascimento: row.dataNascimento || null,
               igreja: row.igreja || null,
@@ -577,8 +590,8 @@ export async function importVolunteers(
           telefone: normalizedTelefone,
           email: rawEmail ? rawEmail.trim() : null,
           status: 'Available',
-          opcao1: row.opcao1 || null,
-          opcao2: row.opcao2 || null,
+          opcao1: normalizeSectorName(row.opcao1) || null,
+          opcao2: normalizeSectorName(row.opcao2) || null,
           idade: row.idade ? Number(row.idade) : null,
           dataNascimento: row.dataNascimento || null,
           igreja: row.igreja || null,
@@ -660,8 +673,8 @@ export async function updateVolunteer(id: string, data: any) {
         nome: data.nome,
         telefone: data.telefone,
         email: data.email || null,
-        opcao1: data.opcao1 || null,
-        opcao2: data.opcao2 || null,
+        opcao1: normalizeSectorName(data.opcao1) || null,
+        opcao2: normalizeSectorName(data.opcao2) || null,
         idade: data.idade ? parseInt(data.idade) : null,
         dataNascimento: data.dataNascimento || null,
         igreja: data.igreja || null,
