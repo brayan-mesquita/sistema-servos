@@ -33,7 +33,7 @@ export async function normalizePhoneNumber(phone: string): Promise<string> {
 function normalizeSectorName(option: string | null | undefined): string | null {
   if (!option) return null;
   const opt = option.toLowerCase().trim();
-  if (opt.includes('adm') || opt.includes('administração') || opt.includes('administracao')) return 'Administração';
+  if (opt.includes('adm') || opt.includes('administração') || opt.includes('administracao')) return 'ADM';
   if (opt.includes('segurança') || opt.includes('seguranca') || opt.includes('prevenção') || opt.includes('prevencao')) return 'Segurança';
   if (opt.includes('eventos') || opt.includes('percorrer')) return 'Eventos';
   if (opt.includes('mídia') || opt.includes('midia')) return 'Mídia';
