@@ -220,6 +220,10 @@ export default function AdminPage() {
           key = 'instagram';
         } else if (h.includes('foto') || h.includes('selfie') || h.includes('self')) {
           key = 'fotoUrl';
+        } else if (h.includes('quantas vezes') || h.includes('vezes') || h.includes('serviu no lgnd')) {
+          key = 'quantidadeServicos';
+        } else if (h.includes('áreas') || h.includes('areas')) {
+          key = 'areasServidas';
         }
 
         // Only add key if it's not mapped to ignore key

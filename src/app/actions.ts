@@ -45,6 +45,33 @@ function normalizeSectorName(option: string | null | undefined): string | null {
   return option;
 }
 
+function calculateAge(birthDateStr: string | undefined | null): number | null {
+  if (!birthDateStr) return null;
+  const parts = birthDateStr.split('/');
+  if (parts.length !== 3) return null;
+  const day = parseInt(parts[0], 10);
+  const month = parseInt(parts[1], 10) - 1;
+  const year = parseInt(parts[2], 10);
+  if (isNaN(day) || isNaN(month) || isNaN(year)) return null;
+  const birthDate = new Date(year, month, day);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const m = today.getMonth() - birthDate.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+}
+
+function mapQtyServices(qtyStr: string | number | undefined | null): number {
+  if (!qtyStr) return 0;
+  if (typeof qtyStr === 'number') return qtyStr;
+  const clean = qtyStr.toString().toLowerCase();
+  if (clean.includes('3') || clean.includes('três') || clean.includes('tres')) return 3;
+  if (clean.includes('1') || clean.includes('2') || clean.includes('uma') || clean.includes('duas')) return 1;
+  return 0;
+}
+
 /**
  * Coordinator login with auto-seeding for default coordinators to ensure seamless testing
  */
@@ -489,10 +516,10 @@ export async function importVolunteers(
     email?: string;
     opcao1?: string;
     opcao2?: string;
-    idade?: number;
+    idade?: string | number;
     dataNascimento?: string;
     igreja?: string;
-    quantidadeServicos?: number;
+    quantidadeServicos?: string | number;
     areasServidas?: string;
     nomePastor?: string;
     telefonePastor?: string;
@@ -554,10 +581,10 @@ export async function importVolunteers(
               // Geralmente, atualizamos apenas dados pessoais. Mantemos o status existente.
               opcao1: normalizeSectorName(row.opcao1) || null,
               opcao2: normalizeSectorName(row.opcao2) || null,
-              idade: row.idade ? Number(row.idade) : null,
+              idade: row.idade && !isNaN(Number(row.idade)) ? Number(row.idade) : calculateAge(row.dataNascimento),
               dataNascimento: row.dataNascimento || null,
               igreja: row.igreja || null,
-              quantidadeServicos: row.quantidadeServicos ? Number(row.quantidadeServicos) : 0,
+              quantidadeServicos: mapQtyServices(row.quantidadeServicos),
               areasServidas: row.areasServidas || null,
               nomePastor: row.nomePastor || null,
               telefonePastor: row.telefonePastor ? await normalizePhoneNumber(row.telefonePastor) : null,
@@ -594,10 +621,10 @@ export async function importVolunteers(
           status: 'Available',
           opcao1: normalizeSectorName(row.opcao1) || null,
           opcao2: normalizeSectorName(row.opcao2) || null,
-          idade: row.idade ? Number(row.idade) : null,
+          idade: row.idade && !isNaN(Number(row.idade)) ? Number(row.idade) : calculateAge(row.dataNascimento),
           dataNascimento: row.dataNascimento || null,
           igreja: row.igreja || null,
-          quantidadeServicos: row.quantidadeServicos ? Number(row.quantidadeServicos) : 0,
+          quantidadeServicos: mapQtyServices(row.quantidadeServicos),
           areasServidas: row.areasServidas || null,
           nomePastor: row.nomePastor || null,
           telefonePastor: row.telefonePastor ? await normalizePhoneNumber(row.telefonePastor) : null,
