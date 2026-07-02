@@ -150,7 +150,7 @@ export default function AdminPage() {
     const lines = text.split(/\r?\n/);
     if (lines.length === 0) return [];
     
-    // Helper to parse CSV line respecting quotes and commas/semicolons inside quotes
+    // Helper to parse CSV line respecting quotes and escaped quotes (e.g. "")
     const parseLine = (line: string) => {
       const result = [];
       let current = '';
@@ -158,7 +158,12 @@ export default function AdminPage() {
       for (let i = 0; i < line.length; i++) {
         const char = line[i];
         if (char === '"') {
-          inQuotes = !inQuotes;
+          if (inQuotes && line[i + 1] === '"') {
+            current += '"';
+            i++; // Skip the escaped quote
+          } else {
+            inQuotes = !inQuotes;
+          }
         } else if ((char === ',' || char === ';') && !inQuotes) {
           result.push(current.trim());
           current = '';
@@ -170,7 +175,7 @@ export default function AdminPage() {
       return result;
     };
 
-    const headers = parseLine(lines[0]).map(h => h.toLowerCase());
+    const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
     
     const rows = [];
     for (let i = 1; i < lines.length; i++) {
@@ -180,23 +185,47 @@ export default function AdminPage() {
       
       headers.forEach((header, index) => {
         const value = cols[index];
+        const h = header.toLowerCase();
         let key = header;
         
-        if (header.includes('nome') || header === 'name') key = 'nome';
-        else if (header.includes('telefone') || header.includes('celular') || header === 'phone') key = 'telefone';
-        else if (header.includes('email')) key = 'email';
-        else if (header.includes('opcao1') || header.includes('opcao 1') || header.includes('opção 1')) key = 'opcao1';
-        else if (header.includes('opcao2') || header.includes('opcao 2') || header.includes('opção 2')) key = 'opcao2';
-        else if (header.includes('idade') || header === 'age') key = 'idade';
-        else if (header.includes('igreja') || header === 'church') key = 'igreja';
-        else if (header.includes('pastor')) key = 'nomePastor';
-        else if (header.includes('telefone pastor') || header.includes('tel pastor')) key = 'telefonePastor';
-        else if (header.includes('legendario') || header.includes('numero') || header.includes('número')) key = 'numeroLegendario';
-        else if (header.includes('anotacoes') || header.includes('obs')) key = 'anotacoes';
-        else if (header.includes('instagram')) key = 'instagram';
-        else if (header.includes('foto') || header.includes('selfie') || header.includes('self')) key = 'fotoUrl';
+        // Match specific fields first to prevent incorrect matches (e.g., 'Nome pastor' matching 'nome')
+        if (h.includes('telefone pastor') || h.includes('tel pastor') || h.includes('tel. pastor')) {
+          key = 'telefonePastor';
+        } else if (h.includes('pastor') || h.includes('padre') || h.includes('líder') || h.includes('lider')) {
+          key = 'nomePastor';
+        } else if (h.includes('esposa') || h.includes('mãe') || h.includes('namorada')) {
+          // Ignores esposa/mãe/namorada columns to prevent overwriting servant's name or phone
+          key = 'ignorar_contato_familiar';
+        } else if (h === 'nome' || h === 'name' || h === 'nome do servo' || h === 'nome completo') {
+          key = 'nome';
+        } else if (h === 'telefone' || h === 'seu telefone' || h === 'phone' || h === 'celular') {
+          key = 'telefone';
+        } else if (h.includes('email') || h === 'e-mail') {
+          key = 'email';
+        } else if (h.includes('opcao1') || h.includes('opcao 1') || h.includes('opção 1') || h.includes('1 opcao') || h.includes('1 opção')) {
+          key = 'opcao1';
+        } else if (h.includes('opcao2') || h.includes('opcao 2') || h.includes('opção 2') || h.includes('2 opcao') || h.includes('2 opção')) {
+          key = 'opcao2';
+        } else if (h.includes('idade') || h === 'age') {
+          key = 'idade';
+        } else if (h.includes('nascimento')) {
+          key = 'dataNascimento';
+        } else if (h.includes('igreja') || h === 'church') {
+          key = 'igreja';
+        } else if (h.includes('legendario') || h.includes('legendário') || h.includes('número') || h.includes('numero')) {
+          key = 'numeroLegendario';
+        } else if (h.includes('anotacoes') || h.includes('obs') || h.includes('observações')) {
+          key = 'anotacoes';
+        } else if (h.includes('instagram')) {
+          key = 'instagram';
+        } else if (h.includes('foto') || h.includes('selfie') || h.includes('self')) {
+          key = 'fotoUrl';
+        }
 
-        row[key] = value;
+        // Only add key if it's not mapped to ignore key
+        if (key !== 'ignorar_contato_familiar') {
+          row[key] = value;
+        }
       });
       rows.push(row);
     }
