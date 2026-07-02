@@ -369,6 +369,31 @@ export async function claimVolunteer(volunteerId: string, sectorId: string) {
       include: { setor: true }
     });
 
+    // Trigger webhook for recruited (asynchronously)
+    getWebhookConfigs().then((webhookRes) => {
+      if (webhookRes.success && webhookRes.recruitedUrl) {
+        triggerWebhook(webhookRes.recruitedUrl, {
+          event: "recruited",
+          timestamp: new Date().toISOString(),
+          setor: volunteer?.setor?.name || "Desconhecido",
+          voluntario: {
+            id: volunteer?.id,
+            nome: volunteer?.nome,
+            telefone: volunteer?.telefone,
+            email: volunteer?.email,
+            opcao1: volunteer?.opcao1,
+            opcao2: volunteer?.opcao2,
+            idade: volunteer?.idade,
+            igreja: volunteer?.igreja,
+            nomePastor: volunteer?.nomePastor,
+            telefonePastor: volunteer?.telefonePastor,
+            numeroLegendario: volunteer?.numeroLegendario,
+            anotacoes: volunteer?.anotacoes
+          }
+        });
+      }
+    }).catch(err => console.error("Error invoking webhook trigger promise:", err));
+
     revalidatePath("/recrutamento");
     revalidatePath("/equipe");
     revalidatePath("/admin");
@@ -384,6 +409,11 @@ export async function claimVolunteer(volunteerId: string, sectorId: string) {
  */
 export async function releaseVolunteer(volunteerId: string) {
   try {
+    const volunteerBefore = await prisma.voluntario.findUnique({
+      where: { id: volunteerId },
+      include: { setor: true }
+    });
+
     const updated = await prisma.voluntario.update({
       where: { id: volunteerId },
       data: {
@@ -392,6 +422,31 @@ export async function releaseVolunteer(volunteerId: string) {
       },
       include: { setor: true }
     });
+
+    // Trigger webhook for released (asynchronously)
+    getWebhookConfigs().then((webhookRes) => {
+      if (webhookRes.success && webhookRes.releasedUrl) {
+        triggerWebhook(webhookRes.releasedUrl, {
+          event: "released",
+          timestamp: new Date().toISOString(),
+          setor: volunteerBefore?.setor?.name || "Nenhum",
+          voluntario: {
+            id: updated.id,
+            nome: updated.nome,
+            telefone: updated.telefone,
+            email: updated.email,
+            opcao1: updated.opcao1,
+            opcao2: updated.opcao2,
+            idade: updated.idade,
+            igreja: updated.igreja,
+            nomePastor: updated.nomePastor,
+            telefonePastor: updated.telefonePastor,
+            numeroLegendario: updated.numeroLegendario,
+            anotacoes: updated.anotacoes
+          }
+        });
+      }
+    }).catch(err => console.error("Error invoking webhook trigger promise:", err));
 
     revalidatePath("/recrutamento");
     revalidatePath("/equipe");
@@ -641,4 +696,66 @@ export async function toggleVolunteerBlock(id: string, blocked: boolean) {
     console.error("Error toggling volunteer block:", error);
     return { success: false, error: `Erro no servidor: ${error.message || error}` };
   }
+}
+
+/**
+ * Fetches the URLs configured for webhooks
+ */
+export async function getWebhookConfigs() {
+  try {
+    const recruited = await prisma.config.findUnique({
+      where: { key: "webhook_recruited" }
+    });
+    const released = await prisma.config.findUnique({
+      where: { key: "webhook_released" }
+    });
+    return {
+      success: true,
+      recruitedUrl: recruited ? recruited.value : "",
+      releasedUrl: released ? released.value : ""
+    };
+  } catch (error: any) {
+    console.error("Error getting webhook configs:", error);
+    return { success: false, error: "Erro ao buscar configurações de webhooks." };
+  }
+}
+
+/**
+ * Saves/Updates the URLs configured for webhooks
+ */
+export async function saveWebhookConfigs(recruitedUrl: string, releasedUrl: string) {
+  try {
+    await prisma.config.upsert({
+      where: { key: "webhook_recruited" },
+      update: { value: recruitedUrl },
+      create: { key: "webhook_recruited", value: recruitedUrl }
+    });
+    await prisma.config.upsert({
+      where: { key: "webhook_released" },
+      update: { value: releasedUrl },
+      create: { key: "webhook_released", value: releasedUrl }
+    });
+    return { success: true };
+  } catch (error: any) {
+    console.error("Error saving webhook configs:", error);
+    return { success: false, error: "Erro ao salvar configurações de webhooks." };
+  }
+}
+
+/**
+ * Helper function to trigger a webhook asynchronously (non-blocking)
+ */
+function triggerWebhook(url: string, payload: any) {
+  if (!url || !url.trim().startsWith("http")) {
+    return;
+  }
+  fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(payload)
+  }).catch((err) => {
+    console.error(`Failed to send webhook to ${url}:`, err);
+  });
 }

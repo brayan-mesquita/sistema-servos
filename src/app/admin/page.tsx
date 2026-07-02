@@ -12,7 +12,9 @@ import {
   getRecruitedVolunteers,
   getAllVolunteers,
   updateVolunteer,
-  toggleVolunteerBlock
+  toggleVolunteerBlock,
+  getWebhookConfigs,
+  saveWebhookConfigs
 } from "@/app/actions";
 
 interface Sector {
@@ -41,6 +43,10 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+  const [webhookRecruited, setWebhookRecruited] = useState("");
+  const [webhookReleased, setWebhookReleased] = useState("");
+  const [savingWebhooks, setSavingWebhooks] = useState(false);
+  const [webhookStatus, setWebhookStatus] = useState<{ success: boolean; message: string } | null>(null);
 
   // Initialize theme
   useEffect(() => {
@@ -83,6 +89,7 @@ export default function AdminPage() {
       const statsRes = await getAdminStats();
       const phaseRes = await getSystemPhase();
       const volunteersRes = await getAllVolunteers();
+      const webhookRes = await getWebhookConfigs();
 
       if (sectorsRes.success && sectorsRes.data) {
         setSectors(sectorsRes.data);
@@ -95,6 +102,10 @@ export default function AdminPage() {
       }
       if (volunteersRes.success && volunteersRes.data) {
         setVolunteers(volunteersRes.data);
+      }
+      if (webhookRes.success) {
+        setWebhookRecruited(webhookRes.recruitedUrl || "");
+        setWebhookReleased(webhookRes.releasedUrl || "");
       }
     } catch (err) {
       console.error("Error loading admin data:", err);
@@ -198,6 +209,24 @@ export default function AdminPage() {
       });
     }
     setImporting(false);
+  };
+
+  const handleSaveWebhooks = async () => {
+    setSavingWebhooks(true);
+    setWebhookStatus(null);
+    try {
+      const res = await saveWebhookConfigs(webhookRecruited, webhookReleased);
+      if (res.success) {
+        setWebhookStatus({ success: true, message: "Integrações salvas com sucesso!" });
+        setTimeout(() => setWebhookStatus(null), 4000);
+      } else {
+        setWebhookStatus({ success: false, message: res.error || "Erro ao salvar." });
+      }
+    } catch (err) {
+      setWebhookStatus({ success: false, message: "Erro ao conectar." });
+    } finally {
+      setSavingWebhooks(false);
+    }
   };
 
   const handleExportAll = async () => {
@@ -665,6 +694,82 @@ export default function AdminPage() {
                     <>
                       <span className="material-symbols-outlined text-sm">play_arrow</span>
                       Processar Importação
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Webhook Integrations */}
+            <div className="lg:col-span-3 bg-[#1a1a1a] border border-[#2a2a2a] p-6 rounded-2xl">
+              <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                <div>
+                  <h4 className="font-display font-bold text-white text-base">Integrações de Webhooks</h4>
+                  <p className="text-xs text-[#e0e0e0] mt-1.5 leading-relaxed">
+                    Configure endpoints HTTP POST para disparar dados dos voluntários quando forem recrutados ou liberados.
+                  </p>
+                </div>
+                {webhookStatus && (
+                  <div className={`p-2.5 px-4 rounded-xl text-xs font-bold border ${
+                    webhookStatus.success 
+                      ? "bg-green-500/10 border-green-500/30 text-green-400" 
+                      : "bg-[#801010]/20 border-red-500/30 text-red-400"
+                  }`}>
+                    {webhookStatus.message}
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-5">
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
+                    Webhook de Recrutamento (POST)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://sua-url-do-n8n/webhook/recrutado"
+                    value={webhookRecruited}
+                    onChange={(e) => setWebhookRecruited(e.target.value)}
+                    className="w-full bg-[#121212] border border-[#2a2a2a] focus:border-[#ff5500]/50 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-600 focus:outline-none transition-colors"
+                  />
+                  <span className="text-[9px] text-gray-500 block leading-tight">
+                    Dispara quando um coordenador aloca um servo ao setor.
+                  </span>
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="text-[10px] text-gray-400 font-bold uppercase tracking-wider block">
+                    Webhook de Liberação (POST)
+                  </label>
+                  <input
+                    type="url"
+                    placeholder="https://sua-url-do-n8n/webhook/liberado"
+                    value={webhookReleased}
+                    onChange={(e) => setWebhookReleased(e.target.value)}
+                    className="w-full bg-[#121212] border border-[#2a2a2a] focus:border-[#ff5500]/50 rounded-xl px-4 py-3 text-xs text-white placeholder-gray-600 focus:outline-none transition-colors"
+                  />
+                  <span className="text-[9px] text-gray-500 block leading-tight">
+                    Dispara quando um servo é liberado e volta para o status "Disponível".
+                  </span>
+                </div>
+              </div>
+
+              <div className="mt-5 pt-4 border-t border-[#2a2a2a] flex justify-end">
+                <button
+                  type="button"
+                  onClick={handleSaveWebhooks}
+                  disabled={savingWebhooks}
+                  className="bg-[#ff5500] hover:bg-[#ff6600] disabled:opacity-40 text-white text-xs font-bold px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-[#ff5500]/10 transition-all cursor-pointer"
+                >
+                  {savingWebhooks ? (
+                    <>
+                      <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                      Salvando...
+                    </>
+                  ) : (
+                    <>
+                      <span className="material-symbols-outlined text-sm">save</span>
+                      Salvar Integrações
                     </>
                   )}
                 </button>
