@@ -23,5 +23,5 @@ EXPOSE 3000
 ENV PORT=3000
 ENV NODE_ENV=production
 
-# Inicia a aplicação
-CMD ["npm", "run", "start"]
+# Inicia a aplicação executando o push e seed do banco de dados antes
+CMD npx prisma db push && npx prisma db seed && npm run start
