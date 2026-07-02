@@ -40,6 +40,8 @@ function normalizeSectorName(option: string | null | undefined): string | null {
   if (opt.includes('logística') || opt.includes('logistica')) return 'Logística';
   if (opt.includes('intercessão') || opt.includes('intercessao') || opt.includes('dip') || opt.includes('prédica') || opt.includes('predica')) return 'DIP';
   if (opt.includes('qap') || opt.includes('suporte')) return 'QAP';
+  if (opt.includes('hakuna')) return 'Hakunas';
+  if (opt.includes('comunicação') || opt.includes('comunicacao')) return 'Comunicação';
   return option;
 }
 
