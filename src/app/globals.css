@@ -1,26 +1,202 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Light Theme (Default) */
+  --background: #f3f4f6;
+  --foreground: #111827;
+  
+  --color-brand-orange: #ff5500;
+  --color-brand-orange-hover: #ff6600;
+  --color-charcoal-bg: #f3f4f6;
+  --color-charcoal-card: #ffffff;
+  --color-charcoal-border: #e5e7eb;
+  --color-charcoal-text-primary: #111827;
+  --color-charcoal-text-secondary: #4b5563;
 }
 
-@theme inline {
+.dark {
+  /* Dark Theme */
+  --background: #121212;
+  --foreground: #ffffff;
+  
+  --color-brand-orange: #ff5500;
+  --color-brand-orange-hover: #ff6600;
+  --color-charcoal-bg: #121212;
+  --color-charcoal-card: #1a1a1a;
+  --color-charcoal-border: #2a2a2a;
+  --color-charcoal-text-primary: #ffffff;
+  --color-charcoal-text-secondary: #e0e0e0;
+}
+
+@theme {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  
+  --color-brand-orange: var(--color-brand-orange);
+  --color-brand-orange-hover: var(--color-brand-orange-hover);
+  --color-charcoal-bg: var(--color-charcoal-bg);
+  --color-charcoal-card: var(--color-charcoal-card);
+  --color-charcoal-border: var(--color-charcoal-border);
+  --color-charcoal-text-primary: var(--color-charcoal-text-primary);
+  --color-charcoal-text-secondary: var(--color-charcoal-text-secondary);
+  
+  /* Short semantic color mappings */
+  --color-primary: var(--color-brand-orange);
+  --color-primary-hover: var(--color-brand-orange-hover);
+  --color-card: var(--color-charcoal-card);
+  --color-border: var(--color-charcoal-border);
+  --color-muted: var(--color-charcoal-text-secondary);
+  
+  /* Typography */
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+  /* Custom drawer and slide animations */
+  --animate-slide-in-right: slide-in-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-out-right: slide-out-right 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-in-bottom: slide-in-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-slide-out-bottom: slide-out-bottom 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-fade-out: fade-out 0.2s ease-in;
+
+  @keyframes slide-in-right {
+    from {
+      transform: translateX(100%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes slide-out-right {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(100%);
+    }
+  }
+  @keyframes slide-in-bottom {
+    from {
+      transform: translateY(100%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+  @keyframes slide-out-bottom {
+    from {
+      transform: translateY(0);
+    }
+    to {
+      transform: translateY(100%);
+    }
+  }
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+    }
+    to {
+      opacity: 0;
+    }
   }
 }
 
+/* Base Styles */
 body {
-  background: var(--background);
+  background-color: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans);
 }
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-charcoal-bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-charcoal-border);
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-orange);
+}
+
+/* Focus Styles for Inputs, Textareas, and Selects */
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--color-brand-orange) !important;
+  box-shadow: 0 0 0 2px rgba(255, 85, 0, 0.2);
+}
+
+/* ==========================================
+   Tailwind Inline Hex Color Overrides for Light Mode
+   ========================================== */
+html:not(.dark) {
+  /* Background overrides */
+  .bg-\[\#121212\] { background-color: #f3f4f6 !important; }
+  .bg-\[\#1a1a1a\] { background-color: #ffffff !important; }
+  .bg-\[\#131313\] { background-color: #f9fafb !important; }
+  .bg-\[\#1c1c1c\] { background-color: #ffffff !important; }
+  .bg-\[\#2a2a2a\] { background-color: #e5e7eb !important; }
+  .bg-gray-800 { background-color: #e5e7eb !important; }
+  .bg-gray-900 { background-color: #f3f4f6 !important; }
+  
+  .bg-\[\#1a1a1a\]\/5 { background-color: rgba(0, 0, 0, 0.03) !important; }
+  .bg-\[\#131313\]\/50 { background-color: rgba(0, 0, 0, 0.02) !important; }
+  
+  /* Text overrides */
+  .text-white { color: #111827 !important; }
+  .text-\[\#e0e0e0\] { color: #374151 !important; }
+  .text-gray-300 { color: #374151 !important; }
+  .text-gray-400 { color: #4b5563 !important; }
+  .text-gray-500 { color: #6b7280 !important; }
+  
+  /* Border overrides */
+  .border-\[\#2a2a2a\] { border-color: #e5e7eb !important; }
+  .border-\[\#3a3a3a\] { border-color: #d1d5db !important; }
+  .divide-\[\#2a2a2a\] > :not([hidden]) ~ :not([hidden]) {
+    border-color: #e5e7eb !important;
+  }
+  .divide-y {
+    border-color: #e5e7eb !important;
+  }
+  
+  /* Hover overrides */
+  .hover\:bg-\[\#2a2a2a\]:hover { background-color: #f3f4f6 !important; }
+  .hover\:text-white:hover { color: #111827 !important; }
+  
+  /* Solid colors that MUST remain white/green/red text */
+  .bg-\[\#ff5500\] *,
+  .bg-green-600 *,
+  .bg-red-500 *,
+  button[type="submit"] *,
+  button.bg-\[\#ff5500\] *,
+  a.bg-green-600 *,
+  .bg-\[\#ff5500\]\/15 * {
+    color: #ffffff !important;
+  }
+  
+  .text-\[\#ff5500\] {
+    color: #ff5500 !important;
+  }
+  
+  /* Inputs placeholder */
+  ::placeholder {
+    color: #9ca3af !important;
+  }
+}
+

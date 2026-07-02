@@ -1,0 +1,58 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Setor {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  meta          Int           @default(10)
+  voluntarios   Voluntario[]
+  coordenadores Coordenador[]
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+}
+
+model Voluntario {
+  id                 String   @id @default(cuid())
+  nome               String
+  email              String?
+  telefone           String   @unique
+  status             String   @default("Available") // "Available" | "Recruited"
+  bloqueado          Boolean  @default(false)
+  setorId            String?
+  setor              Setor?   @relation(fields: [setorId], references: [id])
+  opcao1             String?  // e.g. "Segurança"
+  opcao2             String?  // e.g. "Logística"
+  idade              Int?
+  dataNascimento     String?
+  igreja             String?
+  quantidadeServicos Int      @default(0)
+  areasServidas      String?
+  nomePastor         String?
+  telefonePastor     String?
+  numeroLegendario   String?
+  anotacoes          String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+}
+
+model Coordenador {
+  id           String   @id @default(cuid())
+  nome         String
+  email        String   @unique
+  passwordHash String
+  setorId      String?
+  setor        Setor?   @relation(fields: [setorId], references: [id])
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+}
+
+model Config {
+  key   String @id
+  value String
+}
