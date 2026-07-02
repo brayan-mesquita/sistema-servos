@@ -483,6 +483,8 @@ export async function importVolunteers(
     telefonePastor?: string;
     numeroLegendario?: string;
     anotacoes?: string;
+    instagram?: string;
+    fotoUrl?: string;
   }>,
   mode: 'insert' | 'update' = 'insert'
 ) {
@@ -545,7 +547,9 @@ export async function importVolunteers(
               nomePastor: row.nomePastor || null,
               telefonePastor: row.telefonePastor || null,
               numeroLegendario: row.numeroLegendario || null,
-              anotacoes: row.anotacoes || null
+              anotacoes: row.anotacoes || null,
+              instagram: row.instagram || null,
+              fotoUrl: row.fotoUrl || null
             }
           });
           updatedCount++;
@@ -583,7 +587,9 @@ export async function importVolunteers(
           nomePastor: row.nomePastor || null,
           telefonePastor: row.telefonePastor || null,
           numeroLegendario: row.numeroLegendario || null,
-          anotacoes: row.anotacoes || null
+          anotacoes: row.anotacoes || null,
+          instagram: row.instagram || null,
+          fotoUrl: row.fotoUrl || null
         }
       });
 
@@ -666,7 +672,9 @@ export async function updateVolunteer(id: string, data: any) {
         areasServidas: data.areasServidas || null,
         anotacoes: data.anotacoes || null,
         status: data.status || "Available",
-        setorId: data.setorId || null
+        setorId: data.setorId || null,
+        instagram: data.instagram || null,
+        fotoUrl: data.fotoUrl || null
       }
     });
     revalidatePath("/admin");

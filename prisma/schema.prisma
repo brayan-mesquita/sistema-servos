@@ -37,6 +37,8 @@ model Voluntario {
   telefonePastor     String?
   numeroLegendario   String?
   anotacoes          String?
+  instagram          String?
+  fotoUrl            String?
   createdAt          DateTime @default(now())
   updatedAt          DateTime @updatedAt
 }

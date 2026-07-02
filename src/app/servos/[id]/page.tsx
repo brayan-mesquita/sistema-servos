@@ -28,6 +28,8 @@ interface Volunteer {
     id: string;
     name: string;
   } | null;
+  instagram: string | null;
+  fotoUrl: string | null;
 }
 
 export default function ServantDetailPage() {
@@ -150,10 +152,21 @@ export default function ServantDetailPage() {
 
         {/* Profile Card Header */}
         <div className="bg-[#1a1a1a] border border-[#2a2a2a] p-6 rounded-2xl shadow-xl flex flex-col md:flex-row items-center gap-6 relative overflow-hidden">
-          {/* Silhouette Avatar Placeholder Icon */}
-          <div className="w-24 h-24 bg-[#2a2a2a] border border-[#3a3a3a] text-gray-400 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
-            <span className="material-symbols-outlined text-6xl">person</span>
-          </div>
+          {/* Silhouette Avatar / Real Photo */}
+          {volunteer.fotoUrl ? (
+            <img
+              src={volunteer.fotoUrl}
+              alt={volunteer.nome}
+              className="w-24 h-24 rounded-2xl object-cover border border-[#3a3a3a] flex-shrink-0 shadow-inner"
+              onError={(e) => {
+                (e.target as HTMLElement).style.display = 'none';
+              }}
+            />
+          ) : (
+            <div className="w-24 h-24 bg-[#2a2a2a] border border-[#3a3a3a] text-gray-400 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-inner">
+              <span className="material-symbols-outlined text-6xl">person</span>
+            </div>
+          )}
 
           <div className="flex-grow text-center md:text-left space-y-2">
             <div className="flex flex-col md:flex-row md:items-center gap-2.5">
@@ -228,6 +241,20 @@ export default function ServantDetailPage() {
                   <div className="sm:col-span-2">
                     <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Endereço de E-mail</span>
                     <span className="text-white font-semibold mt-1 block break-all">{volunteer.email}</span>
+                  </div>
+                )}
+
+                {volunteer.instagram && (
+                  <div className="sm:col-span-2">
+                    <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Instagram</span>
+                    <a
+                      href={`https://instagram.com/${volunteer.instagram.replace('@', '')}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#ff5500] hover:underline font-semibold mt-1 block"
+                    >
+                      @{volunteer.instagram.replace('@', '')}
+                    </a>
                   </div>
                 )}
               </div>

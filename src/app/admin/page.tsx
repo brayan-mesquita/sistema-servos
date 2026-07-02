@@ -150,15 +150,32 @@ export default function AdminPage() {
     const lines = text.split(/\r?\n/);
     if (lines.length === 0) return [];
     
-    // Normalize headers: replace quotes and trim
-    const headers = lines[0]
-      .split(/[;,]/)
-      .map(h => h.trim().toLowerCase().replace(/"/g, ''));
+    // Helper to parse CSV line respecting quotes and commas/semicolons inside quotes
+    const parseLine = (line: string) => {
+      const result = [];
+      let current = '';
+      let inQuotes = false;
+      for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if ((char === ',' || char === ';') && !inQuotes) {
+          result.push(current.trim());
+          current = '';
+        } else {
+          current += char;
+        }
+      }
+      result.push(current.trim());
+      return result;
+    };
+
+    const headers = parseLine(lines[0]).map(h => h.toLowerCase());
     
     const rows = [];
     for (let i = 1; i < lines.length; i++) {
       if (!lines[i].trim()) continue;
-      const cols = lines[i].split(/[;,]/).map(c => c.trim().replace(/"/g, ''));
+      const cols = parseLine(lines[i]);
       const row: any = {};
       
       headers.forEach((header, index) => {
@@ -176,6 +193,8 @@ export default function AdminPage() {
         else if (header.includes('telefone pastor') || header.includes('tel pastor')) key = 'telefonePastor';
         else if (header.includes('legendario') || header.includes('numero') || header.includes('número')) key = 'numeroLegendario';
         else if (header.includes('anotacoes') || header.includes('obs')) key = 'anotacoes';
+        else if (header.includes('instagram')) key = 'instagram';
+        else if (header.includes('foto') || header.includes('selfie') || header.includes('self')) key = 'fotoUrl';
 
         row[key] = value;
       });
@@ -324,7 +343,9 @@ export default function AdminPage() {
       areasServidas: v.areasServidas || "",
       anotacoes: v.anotacoes || "",
       status: v.status || "Available",
-      setorId: v.setorId || ""
+      setorId: v.setorId || "",
+      instagram: v.instagram || "",
+      fotoUrl: v.fotoUrl || ""
     });
     setEditError(null);
   };
@@ -883,14 +904,43 @@ export default function AdminPage() {
                     filteredVolunteers.map((v) => (
                       <tr key={v.id} className="hover:bg-[#202020]/30 transition-colors">
                         <td className="py-4 px-5">
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-white">{v.nome}</span>
-                            {v.bloqueado && (
-                              <span className="text-[9px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight flex items-center gap-1 border border-red-500/20">
-                                <span className="material-symbols-outlined text-[10px]">block</span>
-                                Bloqueado
-                              </span>
+                          <div className="flex items-center gap-3">
+                            {/* Avatar */}
+                            {v.fotoUrl ? (
+                              <img
+                                src={v.fotoUrl}
+                                alt={v.nome}
+                                className="w-8 h-8 rounded-full object-cover border border-[#2a2a2a] flex-shrink-0"
+                                onError={(e) => {
+                                  (e.target as HTMLElement).style.display = 'none';
+                                }}
+                              />
+                            ) : (
+                              <div className="w-8 h-8 rounded-full bg-[#2a2a2a] text-[#ff5500] font-bold text-xs flex items-center justify-center border border-[#3a3a3a] flex-shrink-0">
+                                {v.nome.charAt(0).toUpperCase()}
+                              </div>
                             )}
+                            <div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-bold text-white">{v.nome}</span>
+                                {v.bloqueado && (
+                                  <span className="text-[9px] bg-red-500/10 text-red-500 px-2 py-0.5 rounded-full font-bold uppercase tracking-tight flex items-center gap-1 border border-red-500/20">
+                                    <span className="material-symbols-outlined text-[10px]">block</span>
+                                    Bloqueado
+                                  </span>
+                                )}
+                              </div>
+                              {v.instagram && (
+                                <a 
+                                  href={`https://instagram.com/${v.instagram.replace('@', '')}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[10px] text-[#ff5500] hover:underline flex items-center gap-0.5 mt-0.5"
+                                >
+                                  @{v.instagram.replace('@', '')}
+                                </a>
+                              )}
+                            </div>
                           </div>
                         </td>
                         <td className="py-4 px-5 text-gray-300 font-semibold">{v.telefone}</td>
@@ -1115,6 +1165,30 @@ export default function AdminPage() {
                     value={editForm.areasServidas}
                     onChange={(e) => setEditForm({ ...editForm, areasServidas: e.target.value })}
                     className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                  />
+                </div>
+
+                {/* Instagram */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Instagram</label>
+                  <input
+                    type="text"
+                    value={editForm.instagram || ""}
+                    onChange={(e) => setEditForm({ ...editForm, instagram: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="ex: brayanmesquita"
+                  />
+                </div>
+
+                {/* URL da Foto */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">URL da Foto</label>
+                  <input
+                    type="text"
+                    value={editForm.fotoUrl || ""}
+                    onChange={(e) => setEditForm({ ...editForm, fotoUrl: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="https://..."
                   />
                 </div>
 

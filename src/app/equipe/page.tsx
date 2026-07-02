@@ -27,6 +27,8 @@ interface Volunteer {
   numeroLegendario: string | null;
   anotacoes: string | null;
   status: string;
+  instagram?: string | null;
+  fotoUrl?: string | null;
 }
 
 export default function EquipePage() {
@@ -261,9 +263,38 @@ export default function EquipePage() {
                     <tbody className="divide-y divide-[#2a2a2a] print:divide-gray-200">
                       {volunteers.map((v) => (
                         <tr key={v.id} className="hover:bg-[#202020]/30 transition-colors print:hover:bg-transparent">
-                          <td className="py-4 px-5 font-bold text-white print:text-black whitespace-nowrap">
-                            {v.nome}
-                          </td>
+                           <td className="py-4 px-5 font-bold text-white print:text-black whitespace-nowrap">
+                             <div className="flex items-center gap-3">
+                               {/* Avatar */}
+                               {v.fotoUrl ? (
+                                 <img
+                                   src={v.fotoUrl}
+                                   alt={v.nome}
+                                   className="w-8 h-8 rounded-full object-cover border border-[#2a2a2a] flex-shrink-0 print:hidden"
+                                   onError={(e) => {
+                                     (e.target as HTMLElement).style.display = 'none';
+                                   }}
+                                 />
+                               ) : (
+                                 <div className="w-8 h-8 rounded-full bg-[#2a2a2a] text-[#ff5500] font-bold text-xs flex items-center justify-center border border-[#3a3a3a] flex-shrink-0 print:hidden">
+                                   {v.nome.charAt(0).toUpperCase()}
+                                 </div>
+                               )}
+                               <div>
+                                 <span className="block font-bold text-white print:text-black">{v.nome}</span>
+                                 {v.instagram && (
+                                   <a 
+                                     href={`https://instagram.com/${v.instagram.replace('@', '')}`}
+                                     target="_blank"
+                                     rel="noopener noreferrer"
+                                     className="text-[10px] text-[#ff5500] hover:underline flex items-center gap-0.5 mt-0.5 print:hidden"
+                                   >
+                                     @{v.instagram.replace('@', '')}
+                                   </a>
+                                 )}
+                               </div>
+                             </div>
+                           </td>
                           <td className="py-4 px-5 whitespace-nowrap">
                             <a
                               href={formatWhatsAppLink(v.telefone, v.nome)}

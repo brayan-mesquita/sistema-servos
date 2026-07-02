@@ -180,6 +180,8 @@ async function main() {
     const areasServidasRaw = row['Em que áreas você já serviu?'];
     const opcao1Raw = row['1 opção para servir'];
     const opcao2Raw = row['2 opção para servir'];
+    const instagramRaw = row['Instagram'];
+    const fotoUrlRaw = row['Foto servo (self)'];
 
     // Check if sector option 1 is empty or missing
     if (!opcao1Raw || opcao1Raw.trim() === '') {
@@ -228,7 +230,9 @@ async function main() {
         nomePastor: titleCasedPastorNome,
         telefonePastor: normalizedPastorTel,
         numeroLegendario: numeroLgndRaw || null,
-        anotacoes: null
+        anotacoes: null,
+        instagram: instagramRaw ? instagramRaw.trim() : null,
+        fotoUrl: fotoUrlRaw ? fotoUrlRaw.trim() : null
       }
     });
 

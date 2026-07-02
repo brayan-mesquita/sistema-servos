@@ -32,6 +32,8 @@ interface Volunteer {
   anotacoes: string | null;
   status: string;
   bloqueado: boolean;
+  instagram?: string | null;
+  fotoUrl?: string | null;
 }
 
 export default function RecrutamentoPage() {
@@ -345,10 +347,21 @@ export default function RecrutamentoPage() {
                         className="group bg-[#1a1a1a] hover:bg-[#202020] border border-[#2a2a2a] hover:border-[#ff5500]/40 p-4.5 rounded-2xl flex items-center justify-between gap-4 cursor-pointer active:scale-[0.99] transition-all shadow-sm"
                       >
                         <div className="flex items-center gap-3.5 min-w-0">
-                          {/* Avatar icon */}
-                          <div className="w-11 h-11 bg-[#2a2a2a] group-hover:bg-[#ff5500]/10 text-gray-400 group-hover:text-[#ff5500] rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
-                            <span className="material-symbols-outlined text-[22px]">person</span>
-                          </div>
+                          {/* Avatar image / icon */}
+                          {v.fotoUrl ? (
+                            <img
+                              src={v.fotoUrl}
+                              alt={v.nome}
+                              className="w-11 h-11 rounded-xl object-cover border border-[#2a2a2a] group-hover:border-[#ff5500]/40 flex-shrink-0 transition-colors"
+                              onError={(e) => {
+                                (e.target as HTMLElement).style.display = 'none';
+                              }}
+                            />
+                          ) : (
+                            <div className="w-11 h-11 bg-[#2a2a2a] group-hover:bg-[#ff5500]/10 text-gray-400 group-hover:text-[#ff5500] rounded-xl flex items-center justify-center flex-shrink-0 transition-colors">
+                              <span className="material-symbols-outlined text-[22px]">person</span>
+                            </div>
+                          )}
                           
                           <div className="min-w-0">
                             <div className="flex flex-wrap items-center gap-2">
@@ -435,10 +448,21 @@ export default function RecrutamentoPage() {
             {/* Header info */}
             <div className="px-6 pb-4 border-b border-[#2a2a2a] flex justify-between items-start bg-[#131313] pt-4">
               <div className="flex items-center gap-3.5 min-w-0">
-                {/* Silhouette avatar icon placeholder */}
-                <div className="w-12 h-12 bg-[#2a2a2a] border border-[#3a3a3a] text-gray-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
-                  <span className="material-symbols-outlined text-3xl">person</span>
-                </div>
+                {/* Avatar Image / Silhouette placeholder */}
+                {selectedVolunteer.fotoUrl ? (
+                  <img
+                    src={selectedVolunteer.fotoUrl}
+                    alt={selectedVolunteer.nome}
+                    className="w-12 h-12 rounded-xl object-cover border border-[#3a3a3a] flex-shrink-0 shadow-inner"
+                    onError={(e) => {
+                      (e.target as HTMLElement).style.display = 'none';
+                    }}
+                  />
+                ) : (
+                  <div className="w-12 h-12 bg-[#2a2a2a] border border-[#3a3a3a] text-gray-400 rounded-xl flex items-center justify-center flex-shrink-0 shadow-inner">
+                    <span className="material-symbols-outlined text-3xl">person</span>
+                  </div>
+                )}
                 <div className="min-w-0">
                   <div className="flex items-center gap-2">
                     <h3 className="font-display text-lg font-bold text-white truncate">
@@ -491,10 +515,27 @@ export default function RecrutamentoPage() {
                     </svg>
                     Abrir WhatsApp
                   </a>
-                  {selectedVolunteer.email && (
-                    <div className="flex items-center gap-2 pt-2 border-t border-[#2a2a2a]">
-                      <span className="material-symbols-outlined text-sm text-[#ff5500]">mail</span>
-                      <span className="text-xs font-semibold text-white truncate block">{selectedVolunteer.email}</span>
+                  {(selectedVolunteer.email || selectedVolunteer.instagram) && (
+                    <div className="flex flex-col gap-2 pt-2 border-t border-[#2a2a2a]">
+                      {selectedVolunteer.email && (
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm text-[#ff5500]">mail</span>
+                          <span className="text-xs font-semibold text-white truncate block">{selectedVolunteer.email}</span>
+                        </div>
+                      )}
+                      {selectedVolunteer.instagram && (
+                        <div className="flex items-center gap-2">
+                          <span className="material-symbols-outlined text-sm text-[#ff5500]">alternate_email</span>
+                          <a
+                            href={`https://instagram.com/${selectedVolunteer.instagram.replace('@', '')}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs font-bold text-[#ff5500] hover:underline"
+                          >
+                            @{selectedVolunteer.instagram.replace('@', '')}
+                          </a>
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
