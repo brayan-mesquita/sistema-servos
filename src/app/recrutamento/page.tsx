@@ -388,7 +388,7 @@ export default function RecrutamentoPage() {
                               </span>
                               <span className="flex items-center gap-1">
                                 <span className="material-symbols-outlined text-[13px] -mt-0.5">history</span>
-                                serviu {v.quantidadeServicos} {v.quantidadeServicos === 1 ? 'vez' : 'vezes'}
+                                serviu {v.quantidadeServicos === 3 ? 'três ou mais' : v.quantidadeServicos} {v.quantidadeServicos === 1 ? 'vez' : 'vezes'}
                               </span>
                             </div>
                           </div>
@@ -578,7 +578,7 @@ export default function RecrutamentoPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <span className="text-[10px] text-gray-400 block font-semibold">Vezes que serviu</span>
-                      <span className="text-sm font-bold text-white">serviu {selectedVolunteer.quantidadeServicos} {selectedVolunteer.quantidadeServicos === 1 ? "Top" : "Tops"}</span>
+                      <span className="text-sm font-bold text-white">serviu {selectedVolunteer.quantidadeServicos === 3 ? "três ou mais" : selectedVolunteer.quantidadeServicos} {selectedVolunteer.quantidadeServicos === 1 ? "Top" : "Tops"}</span>
                     </div>
                     <div>
                       <span className="text-[10px] text-gray-400 block font-semibold">Opções de Setor</span>

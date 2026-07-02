@@ -229,7 +229,7 @@ export default function ServantDetailPage() {
 
                 <div>
                   <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Tops Servidos</span>
-                  <span className="text-white font-semibold mt-1 block">serviu {volunteer.quantidadeServicos} {volunteer.quantidadeServicos === 1 ? "Top" : "Tops"}</span>
+                  <span className="text-white font-semibold mt-1 block">serviu {volunteer.quantidadeServicos === 3 ? "três ou mais" : volunteer.quantidadeServicos} {volunteer.quantidadeServicos === 1 ? "Top" : "Tops"}</span>
                 </div>
 
                 <div className="sm:col-span-2">
