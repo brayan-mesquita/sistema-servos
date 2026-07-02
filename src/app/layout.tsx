@@ -17,6 +17,7 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "LEGENDÁRIOS - Portal do Servo",
   description: "Portal de recrutamento e escala de servos Legendários",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
 };
 
 export default function RootLayout({
