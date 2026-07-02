@@ -2,6 +2,9 @@ FROM node:20-alpine
 
 WORKDIR /app
 
+# Instala dependências do sistema necessárias para o Prisma (como openssl)
+RUN apk add --no-cache openssl
+
 # Instala as dependências (otimizando cache do Docker)
 COPY package.json package-lock.json ./
 RUN npm ci
