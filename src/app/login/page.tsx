@@ -103,7 +103,7 @@ export default function LoginPage() {
   return (
     <main className="flex min-h-screen w-full bg-[#121212] text-white">
       {/* Left Cover Section - Hidden on mobile */}
-      <section className="hidden lg:flex lg:w-3/5 xl:w-2/3 relative items-center justify-center overflow-hidden border-r border-[#2a2a2a]">
+      <section className="hidden lg:flex lg:w-3/5 xl:w-2/3 relative items-center justify-center overflow-hidden border-r border-[#2a2a2a] keep-dark">
         <div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: "url('/images/amazonia_sunset.jpg')" }}></div>
         <div className="absolute inset-0 bg-gradient-to-tr from-[#0d0d0d] via-[#0d0d0d]/90 to-transparent opacity-95"></div>
         
@@ -118,8 +118,8 @@ export default function LoginPage() {
             LEGENDÁRIOS<br />
             <span className="font-light text-[#ff5500] tracking-wide">PORTAL DO SERVO</span>
           </h1>
-          <p className="font-sans text-[#e0e0e0] text-lg max-w-lg leading-relaxed mb-8">
-            Gerenciamento tático e alocação de servos para grandes desafios. Uma ferramenta de coordenação ágil construída para liderança de campo.
+          <p className="font-sans text-[#f3f4f6] text-xl max-w-lg font-medium tracking-wide mb-8">
+            Gerenciamento Tático e Alocação de Servos
           </p>
           <div className="flex gap-2">
             <div className="h-1.5 w-16 bg-[#ff5500] rounded-full"></div>
