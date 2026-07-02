@@ -150,7 +150,7 @@ export default function EquipePage() {
         <Header />
       </div>
 
-      <main className="pt-8 px-4 md:px-8 max-w-4xl mx-auto space-y-6">
+      <main className="pt-8 px-4 md:px-8 max-w-6xl mx-auto space-y-6">
         
         {/* Page Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4 print:border-b print:pb-4">
@@ -317,19 +317,21 @@ export default function EquipePage() {
                           <td className="py-4 px-5 text-gray-400 print:text-black max-w-xs truncate italic">
                             {v.anotacoes || "Sem observações"}
                           </td>
-                          <td className="py-4 px-5 text-right whitespace-nowrap print:hidden flex items-center justify-end gap-2">
-                            <Link
-                               href={`/servos/${v.id}`}
-                               className="border border-[#2a2a2a] hover:border-[#ff5500]/50 hover:bg-[#ff5500]/10 text-gray-300 hover:text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors"
-                             >
-                               Mais Informações
-                             </Link>
-                            <button
-                              onClick={() => handleLiberar(v.id)}
-                              className="border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 text-red-400 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
-                            >
-                              Liberar
-                            </button>
+                          <td className="py-4 px-5 text-right whitespace-nowrap print:hidden">
+                            <div className="flex items-center justify-end gap-2">
+                              <Link
+                                 href={`/servos/${v.id}`}
+                                 className="border border-[#2a2a2a] hover:border-[#ff5500]/50 hover:bg-[#ff5500]/10 text-gray-300 hover:text-white text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors"
+                               >
+                                 Mais Informações
+                               </Link>
+                              <button
+                                onClick={() => handleLiberar(v.id)}
+                                className="border border-red-500/20 hover:border-red-500/50 hover:bg-red-500/10 text-red-400 text-[10px] font-bold px-3 py-1.5 rounded-lg uppercase tracking-wider transition-colors cursor-pointer"
+                              >
+                                Liberar
+                              </button>
+                            </div>
                           </td>
                         </tr>
                       ))}
