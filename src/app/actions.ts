@@ -72,6 +72,14 @@ function mapQtyServices(qtyStr: string | number | undefined | null): number {
   return 0;
 }
 
+function normalizeText(text: string | null | undefined): string {
+  if (!text) return "";
+  return text
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "");
+}
+
 /**
  * Coordinator login with auto-seeding for default coordinators to ensure seamless testing
  */
@@ -245,11 +253,7 @@ export async function getVolunteers(
       status: "Available"
     };
 
-    if (search.trim()) {
-      whereConditions.nome = {
-        contains: search.trim()
-      };
-    }
+
 
     if (church.trim() && church !== "Filtrar por Igreja" && church !== "Todas") {
       whereConditions.igreja = {
@@ -278,6 +282,14 @@ export async function getVolunteers(
       where: whereConditions,
       orderBy: { nome: 'asc' }
     });
+
+    if (search.trim()) {
+      const cleanSearch = normalizeText(search);
+      const filtered = volunteers.filter(v => 
+        normalizeText(v.nome).includes(cleanSearch)
+      );
+      return { success: true, data: filtered };
+    }
 
     return { success: true, data: volunteers };
   } catch (error: any) {

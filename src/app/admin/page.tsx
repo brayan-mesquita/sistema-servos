@@ -397,10 +397,19 @@ export default function AdminPage() {
     setSavingEdit(false);
   };
 
-  const filteredVolunteers = volunteers.filter(v => 
-    v.nome.toLowerCase().includes(searchServant.toLowerCase()) ||
-    (v.telefone && v.telefone.includes(searchServant))
-  );
+  const normalizeText = (text: string | null | undefined): string => {
+    if (!text) return "";
+    return text
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "");
+  };
+
+  const filteredVolunteers = volunteers.filter(v => {
+    const cleanSearch = normalizeText(searchServant);
+    return normalizeText(v.nome).includes(cleanSearch) ||
+      (v.telefone && v.telefone.includes(searchServant));
+  });
 
   if (loading && sectors.length === 0) {
     return (
