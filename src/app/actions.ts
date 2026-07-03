@@ -257,24 +257,21 @@ export async function getVolunteers(
       };
     }
 
-    // Filter based on phase options
-    if (phase === "1") {
-      whereConditions.opcao1 = sector.name;
-    } else {
-      // Phase 2: Option 1 OR Option 2 matches the sector name
-      whereConditions.OR = [
-        { opcao1: sector.name },
-        { opcao2: sector.name }
-      ];
-    }
-
-    // Direct priority option override
+    // Filter based on phase options and priority override
     if (priority === "opcao1" || priority === "Alta (1ª Opção)") {
-      delete whereConditions.OR;
       whereConditions.opcao1 = sector.name;
     } else if (priority === "opcao2" || priority === "Média (2ª Opção)") {
-      delete whereConditions.OR;
       whereConditions.opcao2 = sector.name;
+    } else {
+      if (phase === "1") {
+        whereConditions.opcao1 = sector.name;
+      } else {
+        // Phase 2: Option 1 OR Option 2 matches the sector name
+        whereConditions.OR = [
+          { opcao1: sector.name },
+          { opcao2: sector.name }
+        ];
+      }
     }
 
     const volunteers = await prisma.voluntario.findMany({
