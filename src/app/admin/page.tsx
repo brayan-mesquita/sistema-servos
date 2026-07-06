@@ -196,8 +196,10 @@ export default function AdminPage() {
         } else if (h.includes('esposa') || h.includes('mãe') || h.includes('namorada')) {
           // Ignores esposa/mãe/namorada columns to prevent overwriting servant's name or phone
           key = 'ignorar_contato_familiar';
-        } else if (h === 'nome' || h === 'name' || h === 'nome do servo' || h === 'nome completo') {
-          key = 'nome';
+        } else if (h === 'nome' || h === 'name' || h === 'nome do servo' || h === 'nome completo' || h.includes('first name') || h === 'primeiro nome') {
+          key = 'firstName';
+        } else if (h.includes('last name') || h === 'sobrenome') {
+          key = 'lastName';
         } else if (h === 'telefone' || h === 'seu telefone' || h === 'phone' || h === 'celular') {
           key = 'telefone';
         } else if (h.includes('email') || h === 'e-mail') {
@@ -231,6 +233,12 @@ export default function AdminPage() {
           row[key] = value;
         }
       });
+
+      // Construct full name if firstName (mapped from Nome or First Name) is present
+      if (row.firstName) {
+        row.nome = [row.firstName, row.lastName].filter(Boolean).join(' ').trim();
+      }
+
       rows.push(row);
     }
     return rows;
