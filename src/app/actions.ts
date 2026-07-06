@@ -738,6 +738,61 @@ export async function updateVolunteer(id: string, data: any) {
 }
 
 /**
+ * Creates a new volunteer in the database
+ */
+export async function createVolunteer(data: any) {
+  try {
+    if (!data.nome) {
+      return { success: false, error: "O nome é obrigatório." };
+    }
+    if (!data.telefone) {
+      return { success: false, error: "O telefone é obrigatório." };
+    }
+
+    const normalizedTelefone = await normalizePhoneNumber(data.telefone);
+
+    // Check if phone number is already registered
+    const existing = await prisma.voluntario.findFirst({
+      where: { telefone: normalizedTelefone }
+    });
+    if (existing) {
+      return { success: false, error: "Já existe um voluntário cadastrado com este telefone." };
+    }
+
+    const newVolunteer = await prisma.voluntario.create({
+      data: {
+        nome: data.nome,
+        telefone: normalizedTelefone,
+        email: data.email || null,
+        opcao1: normalizeSectorName(data.opcao1) || null,
+        opcao2: normalizeSectorName(data.opcao2) || null,
+        idade: data.idade ? parseInt(data.idade) : null,
+        dataNascimento: data.dataNascimento || null,
+        igreja: data.igreja || null,
+        nomePastor: data.nomePastor || null,
+        telefonePastor: data.telefonePastor ? await normalizePhoneNumber(data.telefonePastor) : null,
+        numeroLegendario: data.numeroLegendario || null,
+        quantidadeServicos: data.quantidadeServicos ? parseInt(data.quantidadeServicos) : 0,
+        areasServidas: data.areasServidas || null,
+        anotacoes: data.anotacoes || null,
+        status: data.status || "Available",
+        setorId: data.setorId || null,
+        instagram: data.instagram || null,
+        fotoUrl: data.fotoUrl || null
+      }
+    });
+
+    revalidatePath("/admin");
+    revalidatePath("/recrutamento");
+    revalidatePath("/equipe");
+    return { success: true, data: newVolunteer };
+  } catch (error: any) {
+    console.error("Error creating volunteer:", error);
+    return { success: false, error: error.message || "Erro ao criar voluntário." };
+  }
+}
+
+/**
  * Toggles blocked state of a volunteer
  */
 export async function toggleVolunteerBlock(id: string, blocked: boolean) {

@@ -12,6 +12,7 @@ import {
   getRecruitedVolunteers,
   getAllVolunteers,
   updateVolunteer,
+  createVolunteer,
   toggleVolunteerBlock,
   getWebhookConfigs,
   saveWebhookConfigs
@@ -43,6 +44,30 @@ export default function AdminPage() {
   const [editForm, setEditForm] = useState<any>({});
   const [savingEdit, setSavingEdit] = useState(false);
   const [editError, setEditError] = useState<string | null>(null);
+
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [createForm, setCreateForm] = useState({
+    nome: "",
+    telefone: "",
+    email: "",
+    opcao1: "",
+    opcao2: "",
+    idade: "",
+    dataNascimento: "",
+    igreja: "",
+    nomePastor: "",
+    telefonePastor: "",
+    numeroLegendario: "",
+    quantidadeServicos: 0,
+    areasServidas: "",
+    anotacoes: "",
+    status: "Available",
+    setorId: "",
+    instagram: "",
+    fotoUrl: ""
+  });
+  const [savingCreate, setSavingCreate] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [webhookRecruited, setWebhookRecruited] = useState("");
   const [webhookReleased, setWebhookReleased] = useState("");
   const [savingWebhooks, setSavingWebhooks] = useState(false);
@@ -403,6 +428,47 @@ export default function AdminPage() {
       setEditError(res.error || "Erro ao salvar alterações.");
     }
     setSavingEdit(false);
+  };
+
+  const handleCreate = async () => {
+    if (!createForm.nome.trim()) {
+      setCreateError("O nome é obrigatório.");
+      return;
+    }
+    if (!createForm.telefone.trim()) {
+      setCreateError("O telefone é obrigatório.");
+      return;
+    }
+    setSavingCreate(true);
+    setCreateError(null);
+    const res = await createVolunteer(createForm);
+    if (res.success) {
+      setIsCreateModalOpen(false);
+      setCreateForm({
+        nome: "",
+        telefone: "",
+        email: "",
+        opcao1: "",
+        opcao2: "",
+        idade: "",
+        dataNascimento: "",
+        igreja: "",
+        nomePastor: "",
+        telefonePastor: "",
+        numeroLegendario: "",
+        quantidadeServicos: 0,
+        areasServidas: "",
+        anotacoes: "",
+        status: "Available",
+        setorId: "",
+        instagram: "",
+        fotoUrl: ""
+      });
+      loadAllData();
+    } else {
+      setCreateError(res.error || "Erro ao cadastrar servo.");
+    }
+    setSavingCreate(false);
   };
 
   const normalizeText = (text: string | null | undefined): string => {
@@ -917,17 +983,26 @@ export default function AdminPage() {
                 <h4 className="font-display font-bold text-white text-base">Diretório Geral de Servos</h4>
                 <p className="text-xs text-[#e0e0e0] mt-0.5">Gerencie o cadastro, edite informações, opções de setor e configure bloqueios de elegibilidade.</p>
               </div>
-              <div className="relative w-full md:w-80">
-                <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
-                  search
-                </span>
-                <input
-                  type="text"
-                  value={searchServant}
-                  onChange={(e) => setSearchServant(e.target.value)}
-                  placeholder="Pesquisar servo por nome..."
-                  className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-gray-600 focus:border-[#ff5500] focus:ring-0 outline-none"
-                />
+              <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto items-stretch sm:items-center">
+                <button
+                  onClick={() => setIsCreateModalOpen(true)}
+                  className="flex items-center justify-center gap-2 bg-[#ff5500] hover:bg-[#ff5500]/90 text-white font-bold text-xs px-4 py-2.5 rounded-xl transition-all cursor-pointer shadow-md shadow-[#ff5500]/10"
+                >
+                  <span className="material-symbols-outlined text-sm font-bold">add</span>
+                  Cadastrar Servo
+                </button>
+                <div className="relative w-full sm:w-64">
+                  <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 text-lg">
+                    search
+                  </span>
+                  <input
+                    type="text"
+                    value={searchServant}
+                    onChange={(e) => setSearchServant(e.target.value)}
+                    placeholder="Pesquisar servo..."
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder-gray-600 focus:border-[#ff5500] focus:ring-0 outline-none"
+                  />
+                </div>
               </div>
             </div>
 
@@ -1277,6 +1352,261 @@ export default function AdminPage() {
                   <>
                     <span className="material-symbols-outlined text-sm">save</span>
                     Salvar Alterações
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Creating Servant Dialog Modal */}
+      {isCreateModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm p-4 overflow-y-auto">
+          <div className="bg-[#1a1a1a] border border-[#2a2a2a] w-full max-w-3xl rounded-2xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh] animate-in zoom-in-95 duration-200">
+            <div className="p-6 border-b border-[#2a2a2a] bg-[#131313] flex justify-between items-center">
+              <div>
+                <h3 className="font-display text-lg font-bold text-white">Cadastrar Novo Servo</h3>
+                <p className="text-xs text-[#e0e0e0] mt-1">Preencha os dados do servo para adicioná-lo manualmente ao sistema.</p>
+              </div>
+              <button
+                onClick={() => setIsCreateModalOpen(false)}
+                className="p-1 hover:bg-[#2a2a2a] rounded-full text-[#e0e0e0] hover:text-white transition-colors"
+              >
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="p-6 overflow-y-auto space-y-4 text-xs leading-relaxed flex-grow">
+              {createError && (
+                <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 font-bold">
+                  {createError}
+                </div>
+              )}
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {/* Nome */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Nome do Servo *</label>
+                  <input
+                    type="text"
+                    value={createForm.nome}
+                    onChange={(e) => setCreateForm({ ...createForm, nome: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="Nome completo do participante"
+                    required
+                  />
+                </div>
+
+                {/* Telefone */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Telefone *</label>
+                  <input
+                    type="text"
+                    value={createForm.telefone}
+                    onChange={(e) => setCreateForm({ ...createForm, telefone: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="ex: 5569999909596"
+                    required
+                  />
+                </div>
+
+                {/* Opcao 1 */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">1ª Opção de Setor</label>
+                  <select
+                    value={createForm.opcao1}
+                    onChange={(e) => setCreateForm({ ...createForm, opcao1: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none cursor-pointer"
+                  >
+                    <option value="">Nenhuma</option>
+                    {sectors.map(s => (
+                      <option key={s.id} value={s.name}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Opcao 2 */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">2ª Opção de Setor</label>
+                  <select
+                    value={createForm.opcao2}
+                    onChange={(e) => setCreateForm({ ...createForm, opcao2: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none cursor-pointer"
+                  >
+                    <option value="">Nenhuma</option>
+                    {sectors.map(s => (
+                      <option key={s.id} value={s.name}>{s.name}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Idade */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Idade</label>
+                  <input
+                    type="number"
+                    value={createForm.idade}
+                    onChange={(e) => setCreateForm({ ...createForm, idade: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="Idade do servo"
+                  />
+                </div>
+
+                {/* Data de Nascimento */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Data de Nascimento</label>
+                  <input
+                    type="text"
+                    value={createForm.dataNascimento}
+                    onChange={(e) => setCreateForm({ ...createForm, dataNascimento: e.target.value })}
+                    placeholder="DD/MM/AAAA"
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                  />
+                </div>
+
+                {/* Igreja */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Igreja</label>
+                  <input
+                    type="text"
+                    value={createForm.igreja}
+                    onChange={(e) => setCreateForm({ ...createForm, igreja: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="Nome da igreja que participa"
+                  />
+                </div>
+
+                {/* Numero Legendario */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Número do Legendário</label>
+                  <input
+                    type="text"
+                    value={createForm.numeroLegendario}
+                    onChange={(e) => setCreateForm({ ...createForm, numeroLegendario: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="ex: 162217"
+                  />
+                </div>
+
+                {/* Nome Pastor */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Nome do Pastor</label>
+                  <input
+                    type="text"
+                    value={createForm.nomePastor}
+                    onChange={(e) => setCreateForm({ ...createForm, nomePastor: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="Nome do pastor da igreja"
+                  />
+                </div>
+
+                {/* Telefone Pastor */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Telefone do Pastor</label>
+                  <input
+                    type="text"
+                    value={createForm.telefonePastor}
+                    onChange={(e) => setCreateForm({ ...createForm, telefonePastor: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="Telefone do pastor"
+                  />
+                </div>
+
+                {/* Quantidade Servicos */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Vezes que serviu (Tops)</label>
+                  <input
+                    type="number"
+                    value={createForm.quantidadeServicos}
+                    onChange={(e) => setCreateForm({ ...createForm, quantidadeServicos: Number(e.target.value) || 0 })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                  />
+                </div>
+
+                {/* Email */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">E-mail</label>
+                  <input
+                    type="email"
+                    value={createForm.email}
+                    onChange={(e) => setCreateForm({ ...createForm, email: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="email@exemplo.com"
+                  />
+                </div>
+
+                {/* Areas Servidas */}
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Áreas em que já serviu</label>
+                  <input
+                    type="text"
+                    value={createForm.areasServidas}
+                    onChange={(e) => setCreateForm({ ...createForm, areasServidas: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="ex: DIP, Hakunas, Segurança"
+                  />
+                </div>
+
+                {/* Instagram */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Instagram</label>
+                  <input
+                    type="text"
+                    value={createForm.instagram}
+                    onChange={(e) => setCreateForm({ ...createForm, instagram: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="ex: brayanmesquita"
+                  />
+                </div>
+
+                {/* URL da Foto */}
+                <div className="space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">URL da Foto</label>
+                  <input
+                    type="text"
+                    value={createForm.fotoUrl}
+                    onChange={(e) => setCreateForm({ ...createForm, fotoUrl: e.target.value })}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none"
+                    placeholder="https://..."
+                  />
+                </div>
+
+                {/* Anotacoes */}
+                <div className="sm:col-span-2 space-y-1">
+                  <label className="text-[10px] text-gray-500 font-bold uppercase tracking-wider block">Anotações Internas</label>
+                  <textarea
+                    value={createForm.anotacoes}
+                    onChange={(e) => setCreateForm({ ...createForm, anotacoes: e.target.value })}
+                    rows={3}
+                    className="w-full bg-[#131313] border border-[#2a2a2a] rounded-xl p-3 text-white focus:border-[#ff5500] outline-none resize-none"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="p-4 bg-[#131313] border-t border-[#2a2a2a] flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setIsCreateModalOpen(false)}
+                className="px-5 py-2.5 text-xs font-semibold text-[#e0e0e0] hover:text-white hover:bg-[#2a2a2a] rounded-lg transition-colors cursor-pointer"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={handleCreate}
+                disabled={savingCreate}
+                className="bg-[#ff5500] hover:bg-[#ff6600] disabled:opacity-40 text-white text-xs font-bold px-6 py-2.5 rounded-xl shadow-lg shadow-[#ff5500]/10 transition-all cursor-pointer flex items-center gap-1.5"
+              >
+                {savingCreate ? (
+                  <>
+                    <span className="material-symbols-outlined text-sm animate-spin">sync</span>
+                    Cadastrando...
+                  </>
+                ) : (
+                  <>
+                    <span className="material-symbols-outlined text-sm">person_add</span>
+                    Cadastrar Servo
                   </>
                 )}
               </button>
