@@ -200,7 +200,12 @@ export default function AdminPage() {
       return result;
     };
 
-    const headers = parseLine(lines[0]).map(h => h.trim().toLowerCase());
+    const headers = parseLine(lines[0]).map(h => 
+      h.trim()
+       .toLowerCase()
+       .replace(/[_\-]/g, ' ')
+       .replace(/\s+/g, ' ')
+    );
     
     const rows = [];
     for (let i = 1; i < lines.length; i++) {
