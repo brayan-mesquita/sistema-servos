@@ -104,12 +104,25 @@ export default function Header() {
     router.push("/login");
   };
 
-  const handleSelectSector = (sector: { id: string; name: string }) => {
-    localStorage.setItem("active_sector", JSON.stringify(sector));
-    setActiveSector(sector);
-    setIsModalOpen(false);
-    // Reload path to refresh content or redirect to recruitment queue
-    window.location.reload();
+  const handleSelectSector = (sector: { id: string; name: string } | null) => {
+    if (sector) {
+      localStorage.setItem("active_sector", JSON.stringify(sector));
+      setActiveSector(sector);
+      setIsModalOpen(false);
+      if (pathname === "/admin") {
+        router.push("/recrutamento");
+      } else {
+        window.location.reload();
+      }
+    } else {
+      localStorage.removeItem("active_sector");
+      setActiveSector(null);
+      if (pathname !== "/admin") {
+        router.push("/admin");
+      } else {
+        window.location.reload();
+      }
+    }
   };
 
   if (loading) {
@@ -141,31 +154,45 @@ export default function Header() {
             </div>
           </Link>
 
-          {/* Navigation Links for standard coordinators */}
-          {activeSector && (
-            <nav className="hidden sm:flex items-center gap-4 border-l border-[#2a2a2a] pl-6 h-8">
+          {/* Navigation Links */}
+          <nav className="hidden sm:flex items-center gap-4 border-l border-[#2a2a2a] pl-6 h-8">
+            {user?.isAdmin && (
               <Link
-                href="/recrutamento"
+                href="/admin"
                 className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-all ${
-                  pathname === "/recrutamento"
+                  pathname === "/admin"
                     ? "bg-[#ff5500]/10 text-[#ff5500]"
                     : "text-[#e0e0e0] hover:text-white hover:bg-[#2a2a2a]"
                 }`}
               >
-                Fila de Recrutamento
+                Administração
               </Link>
-              <Link
-                href="/equipe"
-                className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-all ${
-                  pathname === "/equipe"
-                    ? "bg-[#ff5500]/10 text-[#ff5500]"
-                    : "text-[#e0e0e0] hover:text-white hover:bg-[#2a2a2a]"
-                }`}
-              >
-                Minha Equipe
-              </Link>
-            </nav>
-          )}
+            )}
+            {activeSector && (
+              <>
+                <Link
+                  href="/recrutamento"
+                  className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-all ${
+                    pathname === "/recrutamento"
+                      ? "bg-[#ff5500]/10 text-[#ff5500]"
+                      : "text-[#e0e0e0] hover:text-white hover:bg-[#2a2a2a]"
+                  }`}
+                >
+                  Fila de Recrutamento
+                </Link>
+                <Link
+                  href="/equipe"
+                  className={`text-sm font-medium px-3 py-1.5 rounded-lg transition-all ${
+                    pathname === "/equipe"
+                      ? "bg-[#ff5500]/10 text-[#ff5500]"
+                      : "text-[#e0e0e0] hover:text-white hover:bg-[#2a2a2a]"
+                  }`}
+                >
+                  Minha Equipe
+                </Link>
+              </>
+            )}
+          </nav>
         </div>
 
         <div className="flex items-center gap-3">
@@ -182,12 +209,31 @@ export default function Header() {
           )}
 
           {user?.isAdmin && (
-            <Link
-              href="/admin"
-              className="text-xs font-semibold bg-[#2a2a2a] hover:bg-[#3a3a3a] border border-[#3a3a3a] text-white px-3.5 py-1.5 rounded-full transition-all"
-            >
-              Líder Geral (Admin)
-            </Link>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-gray-500 font-bold uppercase tracking-wider hidden lg:block">Simular Setor:</span>
+              <select
+                value={activeSector?.id || ""}
+                onChange={(e) => {
+                  const val = e.target.value;
+                  if (val === "") {
+                    handleSelectSector(null);
+                  } else {
+                    const s = sectors.find(sec => sec.id === val);
+                    if (s) {
+                      handleSelectSector({ id: s.id, name: s.name });
+                    }
+                  }
+                }}
+                className="bg-[#2a2a2a] border border-[#3a3a3a] text-white text-xs font-semibold py-1.5 px-3 rounded-full focus:border-[#ff5500] outline-none cursor-pointer hover:bg-[#323232] transition-colors"
+              >
+                <option value="">Líder Geral (Sem Setor)</option>
+                {sectors.map(s => (
+                  <option key={s.id} value={s.id}>
+                    Setor: {s.name}
+                  </option>
+                ))}
+              </select>
+            </div>
           )}
 
           {/* Theme switcher */}
@@ -347,27 +393,40 @@ export default function Header() {
       {/* Mobile Sticky Footer Navigation */}
       {activeSector && (
         <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 bg-[#1a1a1a] border-t border-[#2a2a2a] h-16 flex items-center justify-around print:hidden">
+          {user?.isAdmin && (
+            <Link
+              href="/admin"
+              className={`flex-1 flex items-center justify-center gap-1.5 h-full font-bold text-[10px] uppercase tracking-wider transition-all border-r border-[#2a2a2a] ${
+                pathname === "/admin"
+                  ? "bg-[#ff5500]/10 text-[#ff5500]"
+                  : "text-gray-400 hover:text-white"
+              }`}
+            >
+              <span className="material-symbols-outlined text-base">admin_panel_settings</span>
+              Painel
+            </Link>
+          )}
           <Link
             href="/equipe"
-            className={`w-1/2 flex items-center justify-center gap-2 h-full font-bold text-xs uppercase tracking-wider transition-all border-r border-[#2a2a2a] ${
+            className={`flex-1 flex items-center justify-center gap-1.5 h-full font-bold text-[10px] uppercase tracking-wider transition-all border-r border-[#2a2a2a] ${
               pathname === "/equipe"
                 ? "bg-[#ff5500]/10 text-[#ff5500]"
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">groups</span>
-            Minha Equipe
+            <span className="material-symbols-outlined text-base">groups</span>
+            Equipe
           </Link>
           <Link
             href="/recrutamento"
-            className={`w-1/2 flex items-center justify-center gap-2 h-full font-bold text-xs uppercase tracking-wider transition-all ${
+            className={`flex-1 flex items-center justify-center gap-1.5 h-full font-bold text-[10px] uppercase tracking-wider transition-all ${
               pathname === "/recrutamento"
                 ? "bg-[#ff5500]/10 text-[#ff5500]"
                 : "text-gray-400 hover:text-white"
             }`}
           >
-            <span className="material-symbols-outlined text-lg">checklist</span>
-            Fila de Recrutamento
+            <span className="material-symbols-outlined text-base">checklist</span>
+            Fila
           </Link>
         </div>
       )}
