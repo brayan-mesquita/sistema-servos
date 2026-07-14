@@ -95,6 +95,31 @@ export default function ServantDetailPage() {
     return `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`;
   };
 
+  const formatPastorWhatsAppLink = (phonePastor: string, nomePastor: string) => {
+    if (!volunteer) return "";
+    const emailParam = volunteer.email ? encodeURIComponent(volunteer.email) : "";
+    const formUrl = `https://api.leadconnectorhq.com/widget/form/w0osf9fUmF1G2VNwtief?notrack=true&email=${emailParam}`;
+    
+    let msg = `Olá *${nomePastor}*, tudo bem? Aqui é o coordenador do setor *${volunteer.setor?.name || ""}* dos Legendários! ⚔️\n\n`;
+    msg += `O voluntário *${volunteer.nome}* se inscreveu para servir conosco e indicou você como seu líder espiritual e pastor de referência.\n\n`;
+    msg += `*Dados do voluntário:*\n`;
+    msg += `• Nome: ${volunteer.nome}\n`;
+    msg += `• Telefone: ${volunteer.telefone}\n`;
+    if (volunteer.email) {
+      msg += `• E-mail: ${volunteer.email}\n`;
+    }
+    if (volunteer.fotoUrl) {
+      msg += `• Foto: ${volunteer.fotoUrl}\n`;
+    }
+    msg += `\nComo líder espiritual do servo, precisamos da sua autorização para que ele possa servir no desafio. Por favor, acesse o link abaixo para preencher o formulário de liberação:\n\n`;
+    msg += `🔗 ${formUrl}\n\n`;
+    msg += `Muito obrigado, Deus abençoe!`;
+
+    const text = encodeURIComponent(msg);
+    const cleaned = phonePastor.replace(/\D/g, "");
+    return `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`;
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-[#121212] text-white font-sans flex flex-col">
@@ -350,7 +375,7 @@ export default function ServantDetailPage() {
                     </div>
 
                     <a
-                      href={formatWhatsAppLink(volunteer.telefonePastor, volunteer.nomePastor || "Pastor")}
+                      href={formatPastorWhatsAppLink(volunteer.telefonePastor, volunteer.nomePastor || "Pastor")}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-green-600/10 hover:bg-green-600 border border-green-500/20 hover:border-green-500 text-green-400 hover:text-white text-xs font-bold py-2.5 rounded-xl flex items-center justify-center gap-2 transition-all transition-colors cursor-pointer"

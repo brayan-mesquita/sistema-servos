@@ -186,6 +186,37 @@ export default function RecrutamentoPage() {
     return `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`;
   };
 
+  const formatPastorWhatsAppLink = (
+    phonePastor: string,
+    nomePastor: string,
+    vName: string,
+    vPhone: string,
+    vEmail: string | null | undefined,
+    vFotoUrl: string | null | undefined
+  ) => {
+    const emailParam = vEmail ? encodeURIComponent(vEmail) : "";
+    const formUrl = `https://api.leadconnectorhq.com/widget/form/w0osf9fUmF1G2VNwtief?notrack=true&email=${emailParam}`;
+    
+    let msg = `Olá *${nomePastor}*, tudo bem? Aqui é o coordenador do setor *${activeSector?.name || ""}* dos Legendários! ⚔️\n\n`;
+    msg += `O voluntário *${vName}* se inscreveu para servir conosco e indicou você como seu líder espiritual e pastor de referência.\n\n`;
+    msg += `*Dados do voluntário:*\n`;
+    msg += `• Nome: ${vName}\n`;
+    msg += `• Telefone: ${vPhone}\n`;
+    if (vEmail) {
+      msg += `• E-mail: ${vEmail}\n`;
+    }
+    if (vFotoUrl) {
+      msg += `• Foto: ${vFotoUrl}\n`;
+    }
+    msg += `\nComo líder espiritual do servo, precisamos da sua autorização para que ele possa servir no desafio. Por favor, acesse o link abaixo para preencher o formulário de liberação:\n\n`;
+    msg += `🔗 ${formUrl}\n\n`;
+    msg += `Muito obrigado, Deus abençoe!`;
+
+    const text = encodeURIComponent(msg);
+    const cleaned = phonePastor.replace(/\D/g, "");
+    return `https://api.whatsapp.com/send?phone=${cleaned}&text=${text}`;
+  };
+
   const occupancyPercent = sectorMeta > 0 ? Math.min(Math.round((allocatedCount / sectorMeta) * 100), 100) : 0;
 
   return (
@@ -557,7 +588,14 @@ export default function RecrutamentoPage() {
                   </div>
                   {selectedVolunteer.telefonePastor ? (
                     <a
-                      href={formatWhatsAppLink(selectedVolunteer.telefonePastor, selectedVolunteer.nomePastor || "Pastor")}
+                      href={formatPastorWhatsAppLink(
+                        selectedVolunteer.telefonePastor,
+                        selectedVolunteer.nomePastor || "Pastor",
+                        selectedVolunteer.nome,
+                        selectedVolunteer.telefone,
+                        selectedVolunteer.email,
+                        selectedVolunteer.fotoUrl
+                      )}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="w-full bg-green-600/10 hover:bg-green-600 border border-green-500/20 hover:border-green-500 text-green-400 hover:text-white text-[11px] font-bold py-2 rounded-lg flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
