@@ -111,7 +111,7 @@ export async function checkGhlStatus(legendarioId: string, fullPhone: string) {
     const stageInfo = STAGE_MAP[servoOpp.pipelineStageId] || { label: "Status desconhecido", level: 0 };
     const level = stageInfo.level;
 
-    const timeline = [
+    const timeline: { name: string, status: "ok" | "pending" | "rejected" }[] = [
       {
         name: "Selecionado pelo Coordenador",
         status: level >= 1 ? "ok" : level === -1 ? "rejected" : "pending"
