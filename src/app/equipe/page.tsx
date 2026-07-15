@@ -10,6 +10,7 @@ import {
   getSectors 
 } from "@/app/actions";
 import { getBatchGhlStatus } from "@/actions/batch-check-status";
+import * as XLSX from "xlsx";
 
 interface Volunteer {
   id: string;
@@ -125,35 +126,20 @@ export default function EquipePage() {
     }
   };
 
-  const handleExportCSV = () => {
+  const handleExportExcel = () => {
     if (volunteers.length === 0) return;
     
-    let csvContent = "data:text/csv;charset=utf-8,";
-    csvContent += "Nome,Telefone,Email,Igreja,Numero Legendario,Anotacoes\n";
+    const exportData = volunteers.map(v => ({
+      "Nome": v.nome,
+      "Telefone": v.telefone,
+      "Igreja": v.igreja || "",
+    }));
 
-    volunteers.forEach(v => {
-      const row = [
-        v.nome,
-        v.telefone,
-        v.email || "",
-        v.igreja || "",
-        v.numeroLegendario || "",
-        v.anotacoes || ""
-      ].map(val => `"${val.replace(/"/g, '""')}"`).join(",");
-      csvContent += row + "\n";
-    });
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Equipe");
 
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `equipe_${activeSector?.name.toLowerCase()}_legendarios.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  };
-
-  const handlePrint = () => {
-    window.print();
+    XLSX.writeFile(workbook, `equipe_${activeSector?.name.toLowerCase()}_legendarios.xlsx`);
   };
 
   const occupancyPercent = sectorMeta > 0 ? Math.min(Math.round((allocatedCount / sectorMeta) * 100), 100) : 0;
@@ -188,20 +174,12 @@ export default function EquipePage() {
           
           <div className="flex gap-2 print:hidden">
             <button
-              onClick={handleExportCSV}
+              onClick={handleExportExcel}
               disabled={volunteers.length === 0}
               className="flex items-center gap-2 border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#2a2a2a] px-4 py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-40 transition-all cursor-pointer"
             >
               <span className="material-symbols-outlined text-green-400 text-base">grid_on</span>
-              Exportar Excel
-            </button>
-            <button
-              onClick={handlePrint}
-              disabled={volunteers.length === 0}
-              className="flex items-center gap-2 border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#2a2a2a] px-4 py-2.5 rounded-xl text-xs font-semibold text-white disabled:opacity-40 transition-all cursor-pointer"
-            >
-              <span className="material-symbols-outlined text-red-400 text-base">picture_as_pdf</span>
-              Imprimir / PDF
+              Exportar em Excel
             </button>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import * as XLSX from "xlsx";
 import { 
   getSectors, 
   getAdminStats, 
@@ -320,40 +321,29 @@ export default function AdminPage() {
   };
 
   const handleExportAll = async () => {
-    // Generate CSV for all recruited volunteers
-    try {
-      let csvContent = "data:text/csv;charset=utf-8,";
-      csvContent += "Nome,Telefone,Email,Setor,Opcao 1,Opcao 2,Igreja,Numero Legendario\n";
-
-      for (const sector of sectors) {
-        const res = await getRecruitedVolunteers(sector.id);
-        if (res.success && res.data) {
-          res.data.forEach(v => {
-            const row = [
-              v.nome,
-              v.telefone,
-              v.email || "",
-              sector.name,
-              v.opcao1 || "",
-              v.opcao2 || "",
-              v.igreja || "",
-              v.numeroLegendario || ""
-            ].map(val => `"${val.replace(/"/g, '""')}"`).join(",");
-            csvContent += row + "\n";
+    const exportData: any[] = [];
+    for (const sector of sectors) {
+      const res = await getRecruitedVolunteers(sector.id);
+      if (res.success && res.data) {
+        res.data.forEach(v => {
+          exportData.push({
+            "Nome": v.nome,
+            "Telefone": v.telefone,
+            "Email": v.email || "",
+            "Setor": sector.name,
+            "Opção 1": v.opcao1 || "",
+            "Opção 2": v.opcao2 || "",
+            "Igreja": v.igreja || "",
+            "Nº Legendário": v.numeroLegendario || ""
           });
-        }
+        });
       }
-
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", "servos_alocados_legendarios.csv");
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    } catch (err) {
-      console.error(err);
     }
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Alocados");
+    XLSX.writeFile(workbook, "servos_alocados_legendarios.xlsx");
   };
 
   const handleLogout = () => {
@@ -600,10 +590,10 @@ export default function AdminPage() {
             <div className="flex gap-2">
               <button 
                 onClick={handleExportAll}
-                className="flex items-center gap-2 border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#2a2a2a] px-4.5 py-2.5 rounded-xl text-xs font-semibold text-white transition-all cursor-pointer"
+                className="flex items-center gap-2 border border-[#2a2a2a] bg-[#1a1a1a] hover:bg-[#2a2a2a] px-5 py-2.5 rounded-xl text-sm font-semibold text-white transition-all cursor-pointer shadow-lg"
               >
-                <span className="material-symbols-outlined text-[#ff5500] text-base">download</span>
-                Exportar Listas Finais
+                <span className="material-symbols-outlined text-green-400">grid_on</span>
+                Exportar Servos Alocados (Excel)
               </button>
             </div>
           </div>
