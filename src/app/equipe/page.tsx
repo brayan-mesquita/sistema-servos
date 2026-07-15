@@ -9,6 +9,7 @@ import {
   releaseVolunteer, 
   getSectors 
 } from "@/app/actions";
+import { getBatchGhlStatus } from "@/actions/batch-check-status";
 
 interface Volunteer {
   id: string;
@@ -45,6 +46,10 @@ export default function EquipePage() {
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
 
+  // Auth statuses map
+  const [authStatuses, setAuthStatuses] = useState<Record<string, { esposaOk: boolean; pastorOk: boolean; rejected: boolean }>>({});
+  const [loadingAuth, setLoadingAuth] = useState(false);
+
   useEffect(() => {
     const storedSector = localStorage.getItem("active_sector");
     if (storedSector) {
@@ -77,7 +82,24 @@ export default function EquipePage() {
       // Get allocated volunteers
       const teamRes = await getRecruitedVolunteers(activeSector.id);
       if (teamRes.success && teamRes.data) {
-        setVolunteers(teamRes.data as Volunteer[]);
+        const vols = teamRes.data as Volunteer[];
+        setVolunteers(vols);
+        
+        // Fetch auth statuses in background
+        if (vols.length > 0) {
+          setLoadingAuth(true);
+          const mappedForAuth = vols.map(v => ({
+            id: v.id,
+            numeroLegendario: v.numeroLegendario,
+            telefone: v.telefone
+          }));
+          getBatchGhlStatus(mappedForAuth).then(authRes => {
+            if (authRes.success && authRes.data) {
+              setAuthStatuses(authRes.data);
+            }
+            setLoadingAuth(false);
+          });
+        }
       }
     } catch (err) {
       console.error(err);
@@ -255,8 +277,7 @@ export default function EquipePage() {
                         <th className="py-4 px-5">Nome</th>
                         <th className="py-4 px-5">Telefone</th>
                         <th className="py-4 px-5">Igreja</th>
-                        <th className="py-4 px-5">Nº Legendário</th>
-                        <th className="py-4 px-5 max-w-xs">Anotações</th>
+                        <th className="py-4 px-5">Autorizações {loadingAuth && <span className="animate-pulse">...</span>}</th>
                         <th className="py-4 px-5 text-right print:hidden">Ações</th>
                       </tr>
                     </thead>
@@ -311,11 +332,27 @@ export default function EquipePage() {
                           <td className="py-4 px-5 text-gray-300 print:text-black">
                             {v.igreja || "—"}
                           </td>
-                          <td className="py-4 px-5 text-gray-300 print:text-black font-mono">
-                            {v.numeroLegendario || "—"}
-                          </td>
-                          <td className="py-4 px-5 text-gray-400 print:text-black max-w-xs truncate italic">
-                            {v.anotacoes || "Sem observações"}
+                          <td className="py-4 px-5">
+                            {authStatuses[v.id] ? (
+                              <div className="flex flex-col gap-1 text-[10px] font-bold uppercase tracking-wider">
+                                {authStatuses[v.id].rejected ? (
+                                  <span className="text-red-400 bg-red-400/10 px-2 py-1 rounded-md border border-red-500/20 inline-block text-center">
+                                    ❌ Recusado
+                                  </span>
+                                ) : (
+                                  <>
+                                    <span className={`px-2 py-1 rounded-md border text-center ${authStatuses[v.id].esposaOk ? 'text-green-400 border-green-500/30 bg-green-500/10' : 'text-gray-400 border-gray-600 bg-gray-800'}`}>
+                                      Esposa: {authStatuses[v.id].esposaOk ? '✅' : '⏳'}
+                                    </span>
+                                    <span className={`px-2 py-1 rounded-md border text-center ${authStatuses[v.id].pastorOk ? 'text-green-400 border-green-500/30 bg-green-500/10' : 'text-gray-400 border-gray-600 bg-gray-800'}`}>
+                                      Pastor: {authStatuses[v.id].pastorOk ? '✅' : '⏳'}
+                                    </span>
+                                  </>
+                                )}
+                              </div>
+                            ) : (
+                              <span className="text-gray-600 italic text-[10px]">Carregando...</span>
+                            )}
                           </td>
                           <td className="py-4 px-5 text-right whitespace-nowrap print:hidden">
                             <div className="flex items-center justify-end gap-2">
