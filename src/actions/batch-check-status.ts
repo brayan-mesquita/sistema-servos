@@ -57,7 +57,8 @@ export async function getBatchGhlStatus(volunteers: { id: string, numeroLegendar
         const contactsRes = await fetch("https://services.leadconnectorhq.com/contacts/search", {
           method: "POST",
           headers,
-          body: JSON.stringify(searchBody)
+          body: JSON.stringify(searchBody),
+          cache: "no-store"
         });
 
         if (!contactsRes.ok) {
@@ -95,7 +96,8 @@ export async function getBatchGhlStatus(volunteers: { id: string, numeroLegendar
 
         const oppRes = await fetch(`https://services.leadconnectorhq.com/opportunities/search?location_id=${locationId}&contact_id=${foundContact.id}`, {
           method: "GET",
-          headers
+          headers,
+          cache: "no-store"
         });
 
         if (!oppRes.ok) {
@@ -123,6 +125,11 @@ export async function getBatchGhlStatus(volunteers: { id: string, numeroLegendar
       });
 
       await Promise.all(chunkPromises);
+      
+      // Delay of 300ms between chunks to absolutely ensure we don't hit rate limits in prod
+      if (i + chunkSize < volunteers.length) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+      }
     }
 
     return { success: true, data: results };

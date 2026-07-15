@@ -35,7 +35,8 @@ export async function checkGhlStatus(legendarioId: string, fullPhone: string) {
     const contactsRes = await fetch("https://services.leadconnectorhq.com/contacts/search", {
       method: "POST",
       headers,
-      body: JSON.stringify(searchBody)
+      body: JSON.stringify(searchBody),
+      cache: "no-store"
     });
 
     if (!contactsRes.ok) {
@@ -79,6 +80,7 @@ export async function checkGhlStatus(legendarioId: string, fullPhone: string) {
     const oppsRes = await fetch(`https://services.leadconnectorhq.com/opportunities/search?location_id=${locationId}&contact_id=${foundContact.id}`, {
       method: "GET",
       headers,
+      cache: "no-store"
     });
 
     if (!oppsRes.ok) {
