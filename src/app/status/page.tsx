@@ -158,21 +158,6 @@ export default function StatusPage() {
                     )}
                   </div>
 
-                  {result.data?.isPaymentReady && (
-                    <div className="mt-6">
-                      <p className="text-green-400 text-sm font-medium mb-3">
-                        🎉 Parabéns, você está apto para realizar o pagamento!
-                      </p>
-                      <a
-                        href="https://ticket-and-go.com/seu-link-aqui" 
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-block w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow-lg shadow-green-900/20"
-                      >
-                        Realizar Pagamento
-                      </a>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
